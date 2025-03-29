@@ -18,7 +18,7 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String description;
-    private String url;
+    private String url; // Optional: Could be removed if all media is in Media entity
 
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
@@ -33,4 +33,10 @@ public class Post {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Like> likes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Media> mediaFiles = new ArrayList<>(); // List of Cloudinary-stored media
+
+    @Enumerated(EnumType.STRING)
+    private SkillLevel skillLevel;
 }
