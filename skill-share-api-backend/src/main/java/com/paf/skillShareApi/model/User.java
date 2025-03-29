@@ -23,6 +23,17 @@ public class User {
     @Column(unique = true)
     private String email;
 
+    private String bio;
+
+    @Column(name = "profile_image_url")
+    private String profileImageUrl; // Cloudinary URL for profile image
+
+    @Column(name = "craft_tokens")
+    private Integer craftTokens = 0;
+
+    @Enumerated(EnumType.STRING)
+    private SkillLevel skillLevel;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
 
@@ -37,4 +48,16 @@ public class User {
 
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Follow> following = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LearningPlan> learningPlans = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notifications = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RequestBoard> requestBoards = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Bid> bids = new ArrayList<>();
 }
