@@ -30,5 +30,11 @@ public class RequestBoard {
     @OneToMany(mappedBy = "requestBoard", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Bid> bids = new ArrayList<>();
 
-    private boolean isResolved;
+    @Column(name = "is_resolved") // Match the database column name
+    private boolean isResolved; // Ensure this field exists
+
+    // Explicit setter to resolve the compilation error
+    public void setIsResolved(boolean isResolved) {
+        this.isResolved = isResolved;
+    }
 }

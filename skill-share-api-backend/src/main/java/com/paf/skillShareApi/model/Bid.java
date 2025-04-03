@@ -28,5 +28,11 @@ public class Bid {
     @JoinColumn(name = "request_board_id")
     private RequestBoard requestBoard;
 
-    private boolean isAccepted;
+    @Column(name = "is_accepted") // Match the database column name
+    private boolean isAccepted; // Ensure this field exists
+
+    // Explicit setter to resolve the compilation error
+    public void setIsAccepted(boolean isAccepted) {
+        this.isAccepted = isAccepted;
+    }
 }
