@@ -16,7 +16,9 @@ public class Notification {
     private Long id;
 
     private String message;
-    private boolean isRead;
+
+    @Column(name = "is_read") // Match the database column name
+    private boolean isRead; // Ensure this field exists
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -27,4 +29,9 @@ public class Notification {
 
     @Enumerated(EnumType.STRING)
     private NotificationType type;
+
+    // Explicit setter to resolve the compilation error
+    public void setIsRead(boolean isRead) {
+        this.isRead = isRead;
+    }
 }
