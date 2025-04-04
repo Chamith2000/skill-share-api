@@ -14,9 +14,6 @@ import java.util.List;
 @Data
 @RequiredArgsConstructor
 public class CreatePostRequestDTO {
-    @NotNull(message = "User ID cannot be null")
-    private Long userId;
-
     @NotBlank(message = "Description cannot be blank")
     @Size(max = 2000, message = "Description cannot exceed 2000 characters")
     private String description;
