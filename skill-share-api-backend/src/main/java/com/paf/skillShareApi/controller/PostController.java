@@ -12,18 +12,17 @@ import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000")
-@RequestMapping("/api/posts")
+@RequestMapping("/api")
 public class PostController {
 
     @Autowired
     private PostService postService;
 
-    @PostMapping("/upload")
-    public ResponseEntity<Map> upload(@Valid @RequestBody CreatePostRequestDTO postRequest) {
-        return postService.createPost(postRequest);
+    @PostMapping("/users/{user-id}/posts")
+    public ResponseEntity<Map> createPost(@Valid @RequestBody CreatePostRequestDTO postRequest, @PathVariable("user-id") Long userId ) {
+        return postService.createPost(postRequest, userId);
     }
 
-    // Other existing methods remain unchanged
     @GetMapping("/{postId}")
     public ResponseEntity<Map> getPost(@PathVariable Long postId) {
         return postService.getPost(postId);

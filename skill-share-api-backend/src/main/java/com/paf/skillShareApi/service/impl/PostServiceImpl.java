@@ -37,14 +37,14 @@ public class PostServiceImpl implements PostService {
     private MediaRepository mediaRepository;
 
     @Override
-    public ResponseEntity<Map> createPost(CreatePostRequestDTO postRequest) {
+    public ResponseEntity<Map> createPost(CreatePostRequestDTO postRequest, Long userId) {
         try {
             if (postRequest.getDescription() == null || postRequest.getDescription().isEmpty()) {
                 throw new InvalidPostContentException("Description cannot be empty");
             }
 
-            User user = userRepository.findById(postRequest.getUserId())
-                    .orElseThrow(() -> new UserNotFoundException(postRequest.getUserId()));
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new UserNotFoundException("User not found id with : " + userId));
 
             Post post = new Post();
             post.setUser(user);

@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.Map;
 
 public interface PostService {
-    public ResponseEntity<Map> createPost(CreatePostRequestDTO postRequest);
+    public ResponseEntity<Map> createPost(CreatePostRequestDTO postRequest, Long userId);
     public ResponseEntity<Map> getPost(Long postId);
     ResponseEntity<Map> getAllPosts();
     public ResponseEntity<Map> updatePost(Long postId, CreatePostRequestDTO postRequest) throws FileUploadException;
