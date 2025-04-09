@@ -1,14 +1,13 @@
 package com.paf.skillShareApi.service;
 
-
 import com.paf.skillShareApi.controller.request.CreateCommentRequestDTO;
-import com.paf.skillShareApi.model.Comment;
+import org.springframework.http.ResponseEntity;
 
-import java.util.List;
+import java.util.Map;
 
 public interface CommentService {
-    Comment createComment(Long postId, CreateCommentRequestDTO commentRequest);
-    List<Comment> getAllCommentsByPostId(Long postId);
-    boolean deleteComment(Long commentId, Long userId);
-    boolean updateComment(Long commentId, Long userId, CreateCommentRequestDTO commentRequest);
+    ResponseEntity<Map> createComment(Long postId, CreateCommentRequestDTO commentRequest);
+    ResponseEntity<Map> getCommentsByPostId(Long postId);
+    ResponseEntity<Map> updateComment(Long commentId, Long userId, CreateCommentRequestDTO commentRequest);
+    ResponseEntity<Map> deleteComment(Long commentId, Long userId);
 }
