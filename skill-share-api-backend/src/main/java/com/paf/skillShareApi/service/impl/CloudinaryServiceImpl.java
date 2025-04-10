@@ -40,20 +40,12 @@ public class CloudinaryServiceImpl implements CloudinaryService {
             options.put("secure", true); // Ensure HTTPS URLs
 
             Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(), options);
-            String publicId = (String) uploadResult.get("public_id");
-            String format = (String) uploadResult.get("format");
-            String resourceType = (String) uploadResult.get("resource_type");
-
-            // Generate the appropriate URL based on resource type
-            if ("video".equals(resourceType)) {
-                return cloudinary.url().resourceType("video").format(format).secure(true).generate(publicId);
-            } else {
-                return cloudinary.url().secure(true).generate(publicId);
-            }
+            return (String) uploadResult.get("secure_url");
         } catch (IOException e) {
             throw new FileUploadException("Failed to upload file to Cloudinary: " + e.getMessage());
         }
     }
+
 
     /**
      * Uploads multiple files to Cloudinary with a maximum limit.

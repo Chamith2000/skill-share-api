@@ -27,7 +27,7 @@ public class PostController {
         return postService.createPost(postRequest, userId);
     }
 
-    @GetMapping("/{postId}")
+    @GetMapping("/posts/{postId}")
     public ResponseEntity<Map> getPost(@PathVariable Long postId) {
         return postService.getPost(postId);
     }
@@ -37,12 +37,12 @@ public class PostController {
         return postService.getAllPosts();
     }
 
-    @PutMapping("/{postId}")
+    @PutMapping("/posts/{postId}")
     public ResponseEntity<Map> updatePost(@PathVariable Long postId, @Valid @RequestBody CreatePostRequestDTO postRequest) throws FileUploadException {
         return postService.updatePost(postId, postRequest);
     }
 
-    @DeleteMapping("/{postId}")
+    @DeleteMapping("/posts/{postId}")
     public ResponseEntity<Map> deletePost(@PathVariable Long postId) {
         return postService.deletePost(postId);
     }

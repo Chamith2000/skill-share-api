@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api")
@@ -28,9 +30,16 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<User> loginUser(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody LoginRequest loginRequest) {
         User authenticatedUser = userService.loginUser(loginRequest.getUsername(), loginRequest.getPassword());
-        return ResponseEntity.ok(authenticatedUser);
+
+        Map<String, Object> userMap = Map.of(
+                "id", authenticatedUser.getId(),
+                "username", authenticatedUser.getUsername(),
+                "email", authenticatedUser.getEmail()
+        );
+
+        return ResponseEntity.ok(userMap);
     }
 
     @GetMapping("/users")
