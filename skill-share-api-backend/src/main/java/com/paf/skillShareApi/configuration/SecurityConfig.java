@@ -15,17 +15,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable() // Disable CSRF for simplicity (enable later if needed)
+                .csrf(csrf -> csrf.disable()) // Correct CSRF configuration
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/api/register", "/api/login", "/api/**").permitAll() // Allow these endpoints without auth
-                        .anyRequest().authenticated() // Protect all other endpoints
+                        .requestMatchers("/api/register", "/api/login", "/api/**").permitAll()
+                        .anyRequest().authenticated()
                 )
-                .httpBasic(); // Use basic auth for protected endpoints
+                .httpBasic();
         return http.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // For hashing passwords
+        return new BCryptPasswordEncoder(); // Ensure BCrypt is used
     }
 }

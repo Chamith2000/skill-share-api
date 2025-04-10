@@ -1,23 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../api/axios';
-import './LoginPage.css'; // Import CSS file
+import './LoginPage.css';
 
 const LoginPage = () => {
-    const [formData, setFormData] = useState({
-        username: '',
-        password: ''
-    });
+    const [formData, setFormData] = useState({ username: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value
-        });
+        setFormData({ ...formData, [name]: value });
     };
 
     const handleSubmit = async (e) => {
@@ -28,17 +22,13 @@ const LoginPage = () => {
         try {
             const response = await api.post('/api/login', formData);
 
-            // Store user info in localStorage or context
+            // Store only necessary data
             localStorage.setItem('user', JSON.stringify(response.data));
 
-            // Redirect to dashboard or home page
-            navigate('/postManagement');
+            navigate('/home-page');
         } catch (error) {
             console.error('Login error:', error);
-            setError(
-                error.response?.data?.message ||
-                'Invalid username or password. Please try again.'
-            );
+            setError(error.response?.data?.message || 'Invalid username or password.');
         } finally {
             setLoading(false);
         }
@@ -52,58 +42,27 @@ const LoginPage = () => {
                     <p>Sign in to your account</p>
                 </div>
 
-                {error && (
-                    <div className="error-message">
-                        {error}
-                    </div>
-                )}
+                {error && <div className="error-message">{error}</div>}
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
-                        <label htmlFor="username">
-                            Username
-                        </label>
-                        <input
-                            type="text"
-                            id="username"
-                            name="username"
-                            value={formData.username}
-                            onChange={handleChange}
-                            placeholder="Enter your username"
-                            required
-                        />
+                        <label htmlFor="username">Username</label>
+                        <input type="text" id="username" name="username" value={formData.username} onChange={handleChange} required />
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="password">
-                            Password
-                        </label>
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            placeholder="Enter your password"
-                            required
-                        />
+                        <label htmlFor="password">Password</label>
+                        <input type="password" id="password" name="password" value={formData.password} onChange={handleChange} required />
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className={`submit-button ${loading ? 'loading' : ''}`}
-                    >
-                        {loading ? '' : 'Sign In'}
+                    <button type="submit" disabled={loading} className={`submit-button ${loading ? 'loading' : ''}`}>
+                        {loading ? 'Signing In...' : 'Sign In'}
                     </button>
                 </form>
 
                 <div className="register-link">
                     <p>
-                        Don't have an account?{' '}
-                        <Link to="/register">
-                            Register here
-                        </Link>
+                        Don't have an account? <Link to="/register">Register here</Link>
                     </p>
                 </div>
             </div>
