@@ -7,7 +7,9 @@ import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -19,7 +21,9 @@ public class PostController {
     private PostService postService;
 
     @PostMapping("/users/{user-id}/posts")
-    public ResponseEntity<Map> createPost(@Valid @RequestBody CreatePostRequestDTO postRequest, @PathVariable("user-id") Long userId ) {
+    public ResponseEntity<Map> createPost(
+            @ModelAttribute CreatePostRequestDTO postRequest,
+            @PathVariable("user-id") Long userId) {
         return postService.createPost(postRequest, userId);
     }
 
@@ -28,7 +32,7 @@ public class PostController {
         return postService.getPost(postId);
     }
 
-    @GetMapping
+    @GetMapping("/posts")
     public ResponseEntity<Map> getAllPosts() {
         return postService.getAllPosts();
     }

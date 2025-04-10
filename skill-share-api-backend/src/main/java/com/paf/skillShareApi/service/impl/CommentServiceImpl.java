@@ -10,9 +10,13 @@ import com.paf.skillShareApi.repository.PostRepository;
 import com.paf.skillShareApi.repository.UserRepository;
 import com.paf.skillShareApi.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CommentServiceImpl implements CommentService {
@@ -26,7 +30,7 @@ public class CommentServiceImpl implements CommentService {
     private UserRepository userRepository;
 
     @Override
-    public Comment createComment(Long postId, CreateCommentRequestDTO commentRequest) {
+    public ResponseEntity<Map> createComment(Long postId, CreateCommentRequestDTO commentRequest) {
         try {
             Comment newComment = new Comment();
 
@@ -41,8 +45,15 @@ public class CommentServiceImpl implements CommentService {
             newComment.setPost(post);
             newComment.setUser(user);
             newComment.setText(commentRequest.getText());
+            newComment.setCreatedAt(new Date(System.currentTimeMillis()));
 
-            return commentRepository.save(newComment);
+            Comment savedComment = commentRepository.save(newComment);
+
+            return ResponseEntity.ok().body(Map.of(
+                    "message", "Comment created successfully",
+                    "commentId", savedComment.getId(),
+                    "comment", savedComment
+            ));
         } catch (PostNotFoundException | UserNotFoundException e) {
             throw e;
         } catch (Exception e) {
@@ -51,30 +62,46 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public List<Comment> getAllCommentsByPostId(Long postId) {
-        // Find the post
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new PostNotFoundException(postId));
+    public ResponseEntity<Map> getCommentsByPostId(Long postId) {
+        try {
+            // Find the post
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new PostNotFoundException(postId));
 
-        // Query the comment repository
-        return commentRepository.findByPost(post);
+            // Query the comment repository
+            List<Comment> comments = commentRepository.findByPost(post);
+
+            return ResponseEntity.ok().body(Map.of(
+                    "comments", comments
+            ));
+        } catch (PostNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to retrieve comments: " + e.getMessage());
+        }
     }
 
     @Override
-    public boolean updateComment(Long commentId, Long userId, CreateCommentRequestDTO commentRequest) {
+    public ResponseEntity<Map> updateComment(Long commentId, Long userId, CreateCommentRequestDTO commentRequest) {
         try {
             Comment comment = commentRepository.findById(commentId)
                     .orElseThrow(() -> new CommentNotFoundException(commentId));
 
             // Check if the user is authorized to update the comment
             if (!comment.getUser().getId().equals(userId)) {
-                throw new UserUnauthorizedException();
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("message", "User not authorized to update this comment"));
             }
 
             comment.setText(commentRequest.getText());
+            comment.setUpdatedAt(new Date(System.currentTimeMillis()));
             commentRepository.save(comment);
-            return true;
-        } catch (CommentNotFoundException | UserUnauthorizedException e) {
+
+            return ResponseEntity.ok().body(Map.of(
+                    "message", "Comment updated successfully",
+                    "commentId", comment.getId()
+            ));
+        } catch (CommentNotFoundException e) {
             throw e;
         } catch (Exception e) {
             throw new CommentOperationFailedException("update", e.getMessage());
@@ -82,19 +109,23 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public boolean deleteComment(Long commentId, Long userId) {
+    public ResponseEntity<Map> deleteComment(Long commentId, Long userId) {
         try {
             Comment comment = commentRepository.findById(commentId)
                     .orElseThrow(() -> new CommentNotFoundException(commentId));
 
             // Check if the user ID matches the owner of the comment
             if (!comment.getUser().getId().equals(userId)) {
-                throw new UserUnauthorizedException();
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("message", "User not authorized to delete this comment"));
             }
 
             commentRepository.delete(comment);
-            return true;
-        } catch (CommentNotFoundException | UserUnauthorizedException e) {
+
+            return ResponseEntity.ok().body(Map.of(
+                    "message", "Comment deleted successfully"
+            ));
+        } catch (CommentNotFoundException e) {
             throw e;
         } catch (Exception e) {
             throw new CommentOperationFailedException("delete", e.getMessage());

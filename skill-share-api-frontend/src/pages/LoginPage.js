@@ -32,7 +32,7 @@ const LoginPage = () => {
             localStorage.setItem('user', JSON.stringify(response.data));
 
             // Redirect to dashboard or home page
-            navigate('/dashboard');
+            navigate('/postManagement');
         } catch (error) {
             console.error('Login error:', error);
             setError(

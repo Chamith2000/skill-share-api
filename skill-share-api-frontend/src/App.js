@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import Dashboard from './pages/Dashboard';
 import Post from "./pages/Post";
+import PostManagement from "./pages/PostManagement";
 
 // Simple auth check
 const PrivateRoute = ({ children }) => {
@@ -18,7 +19,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>}/>
-            <Route path="/post" element={<PrivateRoute><Post /></PrivateRoute>}/>
+          <Route path="/postManagement" element={<PrivateRoute><PostManagement /></PrivateRoute>}/>
           <Route path="*" element={<Navigate to="/login" />} />
         </Routes>
       </BrowserRouter>

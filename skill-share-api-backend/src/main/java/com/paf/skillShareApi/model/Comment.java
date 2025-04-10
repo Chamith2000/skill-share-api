@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Date;
+
 @Entity
 @Table(name = "comments")
 @Data
@@ -21,4 +23,8 @@ public class Comment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Post post;
+
+    private Date createdAt;
+    private Date updatedAt;
+
 }
