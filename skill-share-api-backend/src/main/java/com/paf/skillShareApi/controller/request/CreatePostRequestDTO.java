@@ -18,5 +18,5 @@ public class CreatePostRequestDTO {
     @Size(max = 2000, message = "Description cannot exceed 2000 characters")
     private String description;
 
-    private List<MultipartFile> files = new ArrayList<>(); // Updated to handle multiple files
+    private List<MultipartFile> files = new ArrayList<>();
 }

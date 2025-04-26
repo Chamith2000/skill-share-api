@@ -5,7 +5,8 @@ import RegisterPage from './pages/RegisterPage';
 import HomePage from "./pages/HomePage";
 import CreatePostPage from "./pages/CreatePostPage";
 import PostDetailPage from "./pages/PostDetailPage";
-import Profile from "./pages/Profile";
+// import UserProfilePage from "./pages/UserProfilePage";
+// import CreativeBarter from "./pages/CreativeBarter";
 
 // Simple auth check
 const PrivateRoute = ({ children }) => {
@@ -19,12 +20,16 @@ function App() {
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
-                <Route path="/home-page" element={<HomePage />} />
-                <Route path="/create-post" element={<CreatePostPage />} />
-                <Route path="/posts/:postId" element={<PostDetailPage />} />
-                <Route path="/profile" element={<Profile />} />
+
+                <Route path="/home-page" element={<PrivateRoute><HomePage /></PrivateRoute>} />
+                <Route path="/create-post" element={<PrivateRoute><CreatePostPage /></PrivateRoute>} />
+                <Route path="/posts/:postId" element={<PrivateRoute><PostDetailPage /></PrivateRoute>} />
+                {/* <Route path="/profile" element={<PrivateRoute><UserProfilePage /></PrivateRoute>} /> */}
+                {/* <Route path="/request-board" element={<PrivateRoute><CreativeBarter /></PrivateRoute>} /> */}
+
                 <Route path="*" element={<Navigate to="/login" />} />
             </Routes>
+
         </BrowserRouter>
     );
 }

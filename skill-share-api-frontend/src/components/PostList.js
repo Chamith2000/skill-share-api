@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getAllPosts, getPostById, getCommentsByPostId, createComment, updateComment, deleteComment } from '../services/api';
+import { getAllPosts, getPostById, getCommentsByPostId, createComment, updateComment, deleteComment, updatePost, deletePost, toggleLike, getLikeStatus, followUser, unfollowUser, checkFollowStatus } from '../services/api';
 import './PostList.css';
 
 const PostList = () => {
@@ -12,6 +12,13 @@ const PostList = () => {
     const [commentSubmitting, setCommentSubmitting] = useState({});
     const [editingComment, setEditingComment] = useState(null);
     const [editCommentText, setEditCommentText] = useState('');
+    const [editingPost, setEditingPost] = useState(null);
+    const [editPostText, setEditPostText] = useState('');
+    const [likeStatus, setLikeStatus] = useState({});
+    const [likeSubmitting, setLikeSubmitting] = useState({});
+    // Add follow status state for tracking follow relationships
+    const [followStatus, setFollowStatus] = useState({});
+    const [followSubmitting, setFollowSubmitting] = useState({});
 
     const user = JSON.parse(localStorage.getItem('user') || 'null');
     console.log('Current user:', user);
@@ -58,7 +65,116 @@ const PostList = () => {
         };
 
         fetchPostsAndComments();
+
+        const fetchLikeStatus = async () => {
+            if (!user || !user.id) return;
+
+            const status = {};
+            for (const post of posts) {
+                try {
+                    const response = await getLikeStatus(post.id, user.id);
+                    status[post.id] = response.data.liked;
+                } catch (err) {
+                    console.error(`Error fetching like status for post ${post.id}:`, err);
+                    status[post.id] = false;
+                }
+            }
+            setLikeStatus(status);
+        };
+
+        if (posts.length > 0 && user && user.id) {
+            fetchLikeStatus();
+            fetchFollowStatus(); // Add this to fetch follow status
+        }
     }, []);
+
+    // Function to fetch follow status for all post authors
+    const fetchFollowStatus = async () => {
+        if (!user || !user.id) return;
+
+        const status = {};
+        for (const post of posts) {
+            if (post.userId !== user.id) { // Don't check follow status for own posts
+                try {
+                    const response = await checkFollowStatus(user.id, post.userId);
+                    status[post.userId] = response.data.following;
+                } catch (err) {
+                    console.error(`Error fetching follow status for user ${post.userId}:`, err);
+                    status[post.userId] = false;
+                }
+            }
+        }
+        setFollowStatus(status);
+    };
+
+    // Function to handle follow/unfollow toggling
+    const handleFollowToggle = async (postUserId) => {
+        if (!user || !user.id) {
+            alert('Please log in to follow users.');
+            return;
+        }
+
+        // Don't allow following self
+        if (user.id === postUserId) {
+            return;
+        }
+
+        setFollowSubmitting((prev) => ({ ...prev, [postUserId]: true }));
+
+        try {
+            const isCurrentlyFollowing = followStatus[postUserId] || false;
+
+            if (isCurrentlyFollowing) {
+                // Unfollow user
+                await unfollowUser(user.id, postUserId);
+                setFollowStatus((prev) => ({ ...prev, [postUserId]: false }));
+                console.log(`Unfollowed user ${postUserId}`);
+            } else {
+                // Follow user
+                await followUser(user.id, postUserId);
+                setFollowStatus((prev) => ({ ...prev, [postUserId]: true }));
+                console.log(`Followed user ${postUserId}`);
+            }
+        } catch (err) {
+            console.error('Error toggling follow status:', err);
+            alert('Failed to update follow status. Please try again.');
+        } finally {
+            setFollowSubmitting((prev) => ({ ...prev, [postUserId]: false }));
+        }
+    };
+
+    const handleLikeToggle = async (postId) => {
+        if (!user || !user.id) {
+            alert('Please log in to like posts.');
+            return;
+        }
+
+        setLikeSubmitting((prev) => ({ ...prev, [postId]: true }));
+
+        try {
+            // Call API to toggle like
+            const response = await toggleLike(postId, user.id);
+            console.log(`Like toggled for post ${postId}:`, response.data);
+
+            // Update like status based on server response
+            setLikeStatus((prev) => ({ ...prev, [postId]: response.data.liked }));
+
+            // Update posts with new like count
+            setPosts((prev) => {
+                return prev.map(p => {
+                    if (p.id === postId) {
+                        return { ...p, likeCount: response.data.likeCount };
+                    }
+                    return p;
+                });
+            });
+        } catch (err) {
+            console.error('Error toggling like:', err);
+            alert('Failed to update like status. Please try again.');
+        } finally {
+            setLikeSubmitting((prev) => ({ ...prev, [postId]: false }));
+        }
+    };
 
     const handleCommentSubmit = async (postId) => {
         const commentText = newComments[postId] || '';
@@ -135,7 +251,7 @@ const PostList = () => {
         setEditCommentText(comment.text);
     };
 
-    // Cancel editing
+    // Cancel editing comment
     const handleCancelEdit = () => {
         setEditingComment(null);
         setEditCommentText('');
@@ -220,6 +336,141 @@ const PostList = () => {
         }
     };
 
+    // Start editing a post
+    const handleEditPost = (post) => {
+        if (!user) {
+            alert('Please log in to edit posts.');
+            return;
+        }
+
+        // Check if the current user is the owner of the post
+        if (user.id !== post.userId) {
+            alert('You can only edit your own posts.');
+            return;
+        }
+
+        console.log('Editing post:', post);
+        setEditingPost(post.id);
+        setEditPostText(post.description);
+    };
+
+    // Cancel editing post
+    const handleCancelPostEdit = () => {
+        setEditingPost(null);
+        setEditPostText('');
+    };
+
+    // Save edited post
+    const handleSavePostEdit = async (postId) => {
+        if (!editPostText.trim()) {
+            alert('Post description cannot be empty.');
+            return;
+        }
+
+        try {
+            const postData = {
+                description: editPostText
+            };
+
+            // Optimistic update
+            setPosts((prev) => {
+                return prev.map(p =>
+                    p.id === postId ? { ...p, description: editPostText } : p
+                );
+            });
+
+            // Call API to update post
+            await updatePost(postId, postData);
+            console.log(`Post ${postId} updated successfully`);
+
+            // Reset edit state
+            setEditingPost(null);
+            setEditPostText('');
+        } catch (err) {
+            console.error('Error updating post:', err);
+            alert(`Failed to update post: ${err.message}`);
+
+            // Refresh posts to get the original state
+            try {
+                const postResponse = await getPostById(postId);
+                setPosts((prev) => {
+                    return prev.map(p =>
+                        p.id === postId ? postResponse.data : p
+                    );
+                });
+            } catch (refreshErr) {
+                console.error('Error refreshing post data:', refreshErr);
+            }
+        }
+    };
+
+    // Delete a post
+    const handleDeletePost = async (postId) => {
+        if (!user) {
+            alert('Please log in to delete posts.');
+            return;
+        }
+
+        // Find the post to check ownership
+        const postToDelete = posts.find(p => p.id === postId);
+        if (!postToDelete) {
+            alert('Post not found.');
+            return;
+        }
+
+        // Check if the current user is the owner of the post
+        if (user.id !== postToDelete.userId) {
+            alert('You can only delete your own posts.');
+            return;
+        }
+
+        // Confirm deletion
+        if (!window.confirm('Are you sure you want to delete this post?')) {
+            return;
+        }
+
+        try {
+            // Optimistic update - remove the post from the UI
+            setPosts((prev) => prev.filter(p => p.id !== postId));
+
+            // Call API to delete the post
+            await deletePost(postId);
+            console.log(`Post ${postId} deleted successfully`);
+        } catch (err) {
+            console.error('Error deleting post:', err);
+            alert(`Failed to delete post: ${err.message}`);
+
+            // Refresh all posts to restore the original state
+            try {
+                const response = await getAllPosts();
+                const postIds = response.data.posts.map((post) => post.id);
+
+                const detailedPosts = [];
+                for (const id of postIds) {
+                    try {
+                        const postResponse = await getPostById(id);
+                        detailedPosts.push(postResponse.data);
+                    } catch (fetchErr) {
+                        console.error(`Error fetching post ${id}:`, fetchErr);
+                    }
+                }
+                setPosts(detailedPosts);
+            } catch (refreshErr) {
+                console.error('Error refreshing posts:', refreshErr);
+            }
+        }
+    };
+
+    // Check if user can edit/delete a post
+    const canEditPost = (post) => {
+        return user && user.id === post.userId;
+    };
+
+    // Check if it's the current user's post (to not show follow button on own posts)
+    const isOwnPost = (post) => {
+        return user && user.id === post.userId;
+    };
+
     if (loading) {
         return <div className="loading-spinner">Loading...</div>;
     }
@@ -234,7 +485,7 @@ const PostList = () => {
 
             {posts.length === 0 ? (
                 <div className="no-posts-message">
-                    No posts available!. Be the first to create one!
+                    No posts available! Be the first to create one!
                 </div>
             ) : (
                 <div className="posts-list">
@@ -246,22 +497,73 @@ const PostList = () => {
                                         <span className="avatar-placeholder"></span>
                                     </div>
                                     <div className="user-details">
-                                        <h3>{post.username || 'Unknown User'}</h3>
+                                        <div className="username-with-follow">
+                                            <h3>{post.username || 'Unknown User'}</h3>
+                                            {!isOwnPost(post) && user && (
+                                                <button
+                                                    className={`follow-button ${followStatus[post.userId] ? 'following' : ''}`}
+                                                    onClick={() => handleFollowToggle(post.userId)}
+                                                    disabled={followSubmitting[post.userId]}
+                                                >
+                                                    {followSubmitting[post.userId]
+                                                        ? '...'
+                                                        : followStatus[post.userId]
+                                                            ? 'Unfollow'
+                                                            : 'Follow'
+                                                    }
+                                                </button>
+                                            )}
+                                        </div>
                                         <span className="user-tagline">{post.tagline || 'Business Company'}</span>
                                     </div>
-                                    <div className="post-options">
-                                        <span className="options-icon">⋮</span>
-                                    </div>
+                                    {canEditPost(post) && (
+                                        <div className="post-options">
+                                            <div className="dropdown">
+                                                <span className="options-icon">⋮</span>
+                                                <div className="dropdown-content">
+                                                    <button onClick={() => handleEditPost(post)} className="edit-button">Edit Post</button>
+                                                    <button onClick={() => handleDeletePost(post.id)} className="delete-button">Delete Post</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </header>
 
                             <div className="post-description">
-                                <p>
-                                    {post.description.length > 100
-                                        ? `${post.description.substring(0, 100)}...`
-                                        : post.description}
-                                </p>
-                                <p className="hashtags">{post.hashtags || '#business #company #mockup'}</p>
+                                {editingPost === post.id ? (
+                                    <div className="post-edit-form">
+                                        <textarea
+                                            value={editPostText}
+                                            onChange={(e) => setEditPostText(e.target.value)}
+                                            rows={3}
+                                            className="post-edit-textarea"
+                                        />
+                                        <div className="post-edit-actions">
+                                            <button
+                                                onClick={() => handleSavePostEdit(post.id)}
+                                                className="edit-save-btn"
+                                            >
+                                                Save
+                                            </button>
+                                            <button
+                                                onClick={handleCancelPostEdit}
+                                                className="edit-cancel-btn"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <p>
+                                            {post.description.length > 100
+                                                ? `${post.description.substring(0, 100)}...`
+                                                : post.description}
+                                        </p>
+                                        <p className="hashtags">{post.hashtags || '#business #company #mockup'}</p>
+                                    </>
+                                )}
                             </div>
 
                             {post.media && post.media.length > 0 ? (
@@ -287,9 +589,15 @@ const PostList = () => {
                             )}
 
                             <div className="post-actions">
-                                <button className="action-button">
-                                    <span className="heart-icon">❤️</span>
-                                    <span>{post.likes || 0}</span>
+                                <button
+                                    className={`action-button ${likeStatus[post.id] ? 'liked' : ''}`}
+                                    onClick={() => handleLikeToggle(post.id)}
+                                    disabled={likeSubmitting[post.id]}
+                                >
+                                    <span className="heart-icon">
+                                        {likeStatus[post.id] ? '❤️' : '🤍'}
+                                    </span>
+                                    <span>{post.likeCount || 0}</span>
                                 </button>
                                 <button className="action-button">
                                     <span className="comment-icon">💬</span>

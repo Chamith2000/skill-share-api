@@ -1,5 +1,6 @@
 package com.paf.skillShareApi.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -17,14 +18,15 @@ public class Notification {
 
     private String message;
 
-    @Column(name = "is_read") // Match the database column name
-    private boolean isRead; // Ensure this field exists
+    @Column(name = "is_read")
+    private boolean isRead;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @JsonBackReference
     private User user;
 
     @Enumerated(EnumType.STRING)
