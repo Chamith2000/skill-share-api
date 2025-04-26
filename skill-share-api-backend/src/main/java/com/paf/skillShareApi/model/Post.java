@@ -39,6 +39,7 @@ public class Post {
     private List<Like> likes = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Media> mediaFiles = new ArrayList<>(); // List of Cloudinary-stored media
 
     @Enumerated(EnumType.STRING)

@@ -15,7 +15,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Correct CSRF configuration
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/api/register", "/api/login", "/api/**").permitAll()
                         .anyRequest().authenticated()
@@ -26,6 +26,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // Ensure BCrypt is used
+        return new BCryptPasswordEncoder();
     }
 }

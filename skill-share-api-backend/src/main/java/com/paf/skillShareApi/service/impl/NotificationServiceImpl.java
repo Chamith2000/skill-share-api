@@ -31,7 +31,59 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setUser(user);
         notification.setMessage(message);
         notification.setType(NotificationType.valueOf(type.toUpperCase()));
-        notification.setIsRead(false); // This should now work
+        notification.setIsRead(false);
+        notification.setCreatedAt(LocalDateTime.now());
+
+        return notificationRepository.save(notification);
+    }
+
+    @Override
+    public Notification createLikeNotification(User liker, Long postOwnerId) {
+        User postOwner = userRepository.findById(postOwnerId)
+                .orElseThrow(() -> new UserNotFoundException(postOwnerId));
+
+        // Don't create notification if user likes their own post
+        if (liker.getId().equals(postOwnerId)) {
+            return null;
+        }
+
+        Notification notification = new Notification();
+        notification.setUser(postOwner);
+        notification.setMessage(String.format("%s liked your post", liker.getUsername()));
+        notification.setType(NotificationType.LIKE);
+        notification.setIsRead(false);
+        notification.setCreatedAt(LocalDateTime.now());
+
+        return notificationRepository.save(notification);
+    }
+
+    @Override
+    public Notification createCommentNotification(User commenter, Long postOwnerId) {
+        User postOwner = userRepository.findById(postOwnerId)
+                .orElseThrow(() -> new UserNotFoundException(postOwnerId));
+
+        // Don't create notification if user comments on their own post
+        if (commenter.getId().equals(postOwnerId)) {
+            return null;
+        }
+
+        Notification notification = new Notification();
+        notification.setUser(postOwner);
+        notification.setMessage(String.format("%s commented on your post", commenter.getUsername()));
+        notification.setType(NotificationType.COMMENT);
+        notification.setIsRead(false);
+        notification.setCreatedAt(LocalDateTime.now());
+
+        return notificationRepository.save(notification);
+    }
+
+    @Override
+    public Notification createFollowNotification(User follower, User followee) {
+        Notification notification = new Notification();
+        notification.setUser(followee);
+        notification.setMessage(String.format("%s started following you", follower.getUsername()));
+        notification.setType(NotificationType.FOLLOW);
+        notification.setIsRead(false);
         notification.setCreatedAt(LocalDateTime.now());
 
         return notificationRepository.save(notification);
@@ -46,7 +98,16 @@ public class NotificationServiceImpl implements NotificationService {
     public void markAsRead(Long notificationId) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new RuntimeException("Notification not found with ID: " + notificationId));
-        notification.setIsRead(true); // This should now work
+        notification.setIsRead(true);
         notificationRepository.save(notification);
+    }
+
+    @Override
+    public void markAllAsRead(Long userId) {
+        List<Notification> notifications = notificationRepository.findByUserIdAndIsReadFalse(userId);
+        for (Notification notification : notifications) {
+            notification.setIsRead(true);
+        }
+        notificationRepository.saveAll(notifications);
     }
 }

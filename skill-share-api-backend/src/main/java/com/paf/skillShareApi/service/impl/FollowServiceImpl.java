@@ -1,85 +1,134 @@
 package com.paf.skillShareApi.service.impl;
 
-import com.paf.skillShareApi.exception.FollowOperationFailedException;
-import com.paf.skillShareApi.exception.SelfFollowException;
-import com.paf.skillShareApi.exception.UserNotFoundException;
+import com.paf.skillShareApi.controller.dto.FollowCountsDTO;
+import com.paf.skillShareApi.controller.response.FollowResponseDTO;
+import com.paf.skillShareApi.controller.dto.UserSummaryDTO;
+import com.paf.skillShareApi.exception.ResourceNotFoundException;
 import com.paf.skillShareApi.model.Follow;
 import com.paf.skillShareApi.model.User;
 import com.paf.skillShareApi.repository.FollowRepository;
 import com.paf.skillShareApi.repository.UserRepository;
 import com.paf.skillShareApi.service.FollowService;
-import lombok.RequiredArgsConstructor;
+import com.paf.skillShareApi.service.NotificationService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class FollowServiceImpl implements FollowService {
 
-    private final FollowRepository followRepository;
-    private final UserRepository userRepository;
+    @Autowired
+    private FollowRepository followRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
-    public void followUser(Long followerId, Long followeeId) {
-        // Check if user is trying to follow themselves
+    @Transactional
+    public FollowResponseDTO followUser(Long followerId, Long followeeId) {
         if (followerId.equals(followeeId)) {
-            throw new SelfFollowException();
+            throw new IllegalArgumentException("Users cannot follow themselves");
         }
 
-        try {
-            // Find the follower user
-            User follower = userRepository.findById(followerId)
-                    .orElseThrow(() -> new UserNotFoundException(followerId));
+        User follower = userRepository.findById(followerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Follower user not found"));
 
-            // Find the followee user
-            User followee = userRepository.findById(followeeId)
-                    .orElseThrow(() -> new UserNotFoundException(followeeId));
+        User followee = userRepository.findById(followeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Followee user not found"));
 
-            // Check if already following
-            Follow existingFollow = followRepository.findByFollowerAndFollowee(follower, followee);
-            if (existingFollow != null) {
-                throw new FollowOperationFailedException("follow", "Already following this user");
-            }
-
-            // Create and save the follow relationship
-            Follow follow = new Follow();
-            follow.setFollower(follower);
-            follow.setFollowee(followee);
-            followRepository.save(follow);
-        } catch (UserNotFoundException | SelfFollowException | FollowOperationFailedException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new FollowOperationFailedException("follow", e.getMessage());
+        Optional<Follow> existingFollow = followRepository.findByFollowerIdAndFolloweeId(followerId, followeeId);
+        if (existingFollow.isPresent()) {
+            return mapToResponseDTO(existingFollow.get(), true);
         }
+
+        Follow follow = new Follow();
+        follow.setFollower(follower);
+        follow.setFollowee(followee);
+        Follow savedFollow = followRepository.save(follow);
+
+        notificationService.createFollowNotification(follower, followee);
+
+        return mapToResponseDTO(savedFollow, true);
     }
 
     @Override
-    public void unfollowUser(Long followerId, Long followeeId) {
-        // Check if user is trying to unfollow themselves
-        if (followerId.equals(followeeId)) {
-            throw new SelfFollowException();
-        }
+    @Transactional
+    public FollowResponseDTO unfollowUser(Long followerId, Long followeeId) {
+        userRepository.findById(followerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Follower user not found"));
 
-        try {
-            // Find the follower user
-            User follower = userRepository.findById(followerId)
-                    .orElseThrow(() -> new UserNotFoundException(followerId));
+        userRepository.findById(followeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Followee user not found"));
 
-            // Find the followee user
-            User followee = userRepository.findById(followeeId)
-                    .orElseThrow(() -> new UserNotFoundException(followeeId));
+        Follow follow = followRepository.findByFollowerIdAndFolloweeId(followerId, followeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Follow relationship not found"));
 
-            // Find the follow relationship
-            Follow follow = followRepository.findByFollowerAndFollowee(follower, followee);
-            if (follow == null) {
-                throw new FollowOperationFailedException("unfollow", "Not following this user");
-            }
+        FollowResponseDTO response = mapToResponseDTO(follow, false);
+        followRepository.delete(follow);
 
-            // Delete the follow relationship
-            followRepository.delete(follow);
-        } catch (UserNotFoundException | SelfFollowException | FollowOperationFailedException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new FollowOperationFailedException("unfollow", e.getMessage());
-        }
+        return response;
+    }
+
+    @Override
+    public boolean isFollowing(Long followerId, Long followeeId) {
+        return followRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
+    }
+
+    @Override
+    public List<UserSummaryDTO> getFollowers(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        List<Follow> followers = followRepository.findByFolloweeId(userId);
+        return followers.stream()
+                .map(follow -> mapUserToSummaryDTO(follow.getFollower()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserSummaryDTO> getFollowing(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        List<Follow> following = followRepository.findByFollowerId(userId);
+        return following.stream()
+                .map(follow -> mapUserToSummaryDTO(follow.getFollowee()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public FollowCountsDTO getFollowCounts(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        long followersCount = followRepository.countByFolloweeId(userId);
+        long followingCount = followRepository.countByFollowerId(userId);
+
+        return new FollowCountsDTO(followersCount, followingCount);
+    }
+
+    private UserSummaryDTO mapUserToSummaryDTO(User user) {
+        return new UserSummaryDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getProfileImageUrl(),
+                user.getBio()
+        );
+    }
+
+    private FollowResponseDTO mapToResponseDTO(Follow follow, boolean followed) {
+        return new FollowResponseDTO(
+                follow.getId(),
+                mapUserToSummaryDTO(follow.getFollower()),
+                mapUserToSummaryDTO(follow.getFollowee()),
+                followed
+        );
     }
 }
