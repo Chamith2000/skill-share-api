@@ -95,20 +95,35 @@ public class PostServiceImpl implements PostService {
             response.put("id", post.getId());
             response.put("description", post.getDescription());
             response.put("date", post.getDate());
-            response.put("userId", post.getUser().getId()); // This is already a Long
+
+            // Add user information including username
+            User user = post.getUser();
+            if (user != null) {
+                response.put("userId", user.getId());
+                response.put("username", user.getUsername()); // Add username
+            } else {
+                response.put("userId", null);
+                response.put("username", "Unknown User");
+                response.put("tagline", "Business Company");
+            }
 
             List<Map<String, Object>> mediaList = post.getMediaFiles().stream()
-                    .map(media -> Map.<String, Object>of(
-                            "url", media.getUrl(),
-                            "mediaType", media.getMediaType(),
-                            "uploadedAt", media.getUploadedAt()
-                    ))
+                    .map(media -> {
+                        Map<String, Object> mediaMap = new HashMap<>();
+                        mediaMap.put("url", media.getUrl());
+                        mediaMap.put("mediaType", media.getMediaType());
+                        mediaMap.put("uploadedAt", media.getUploadedAt());
+                        return mediaMap;
+                    })
                     .collect(Collectors.toList());
             response.put("media", mediaList);
 
             response.put("commentCount", post.getComments().size());
             response.put("likeCount", post.getLikes().size());
             response.put("skillLevel", post.getSkillLevel());
+
+            // Add hashtags if available
+
 
             return ResponseEntity.ok().body(response);
         } catch (PostNotFoundException e) {
@@ -138,22 +153,44 @@ public class PostServiceImpl implements PostService {
                             postMap.put("description", post.getDescription() != null ? post.getDescription() : "");
                             postMap.put("date", post.getDate());
 
-                            // User ID with null check
-                            Long userId = (post.getUser() != null) ? post.getUser().getId() : null;
-                            postMap.put("userId", userId);
+                            // Add user information including username
+                            User user = post.getUser();
+                            if (user != null) {
+                                postMap.put("userId", user.getId());
+                                postMap.put("username", user.getUsername()); // Add username
+                            } else {
+                                postMap.put("userId", null);
+                                postMap.put("username", "Unknown User");
+                                postMap.put("tagline", "Business Company");
+                            }
 
                             // Handle collections with null checks
                             List<Media> mediaFiles = post.getMediaFiles() != null ? post.getMediaFiles() : new ArrayList<>();
                             List<Comment> comments = post.getComments() != null ? post.getComments() : new ArrayList<>();
                             List<Like> likes = post.getLikes() != null ? post.getLikes() : new ArrayList<>();
 
+                            // Add media information
+                            List<Map<String, Object>> mediaList = mediaFiles.stream()
+                                    .map(media -> {
+                                        Map<String, Object> mediaMap = new HashMap<>();
+                                        mediaMap.put("url", media.getUrl());
+                                        mediaMap.put("mediaType", media.getMediaType());
+                                        mediaMap.put("uploadedAt", media.getUploadedAt());
+                                        return mediaMap;
+                                    })
+                                    .collect(Collectors.toList());
+                            postMap.put("media", mediaList);
                             postMap.put("mediaCount", mediaFiles.size());
+
                             postMap.put("commentCount", comments.size());
                             postMap.put("likeCount", likes.size());
+                            postMap.put("likes", likes.size());  // Added to match frontend expectation
 
                             // Skill level with default
                             SkillLevel skillLevel = post.getSkillLevel() != null ? post.getSkillLevel() : SkillLevel.BEGINNER;
                             postMap.put("skillLevel", skillLevel);
+
+                            // Add hashtags if available
 
                             return postMap;
                         } catch (Exception e) {
@@ -184,6 +221,18 @@ public class PostServiceImpl implements PostService {
             }
 
             if (postRequest.getFiles() != null && !postRequest.getFiles().isEmpty()) {
+                // Delete existing media files from Cloudinary
+                for (Media media : post.getMediaFiles()) {
+                    String publicId = media.getCloudinaryPublicId();
+                    if (publicId != null && !publicId.isEmpty()) {
+                        try {
+                            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+                        } catch (Exception e) {
+                            System.err.println("Failed to delete media from Cloudinary with public_id: " + publicId);
+                        }
+                    }
+                }
+
                 mediaRepository.deleteAll(post.getMediaFiles());
                 post.getMediaFiles().clear();
 
@@ -195,8 +244,11 @@ public class PostServiceImpl implements PostService {
                     );
 
                     String uploadedUrl = (String) uploadResult.get("secure_url");
+                    String publicId = (String) uploadResult.get("public_id");
+
                     Media media = new Media();
                     media.setUrl(uploadedUrl);
+                    media.setCloudinaryPublicId(publicId);
                     String contentType = file.getContentType();
                     media.setMediaType(contentType != null && contentType.startsWith("video") ? "video" : "image");
                     media.setUploadedAt(LocalDateTime.now());
@@ -215,7 +267,7 @@ public class PostServiceImpl implements PostService {
         } catch (PostNotFoundException e) {
             throw e;
         } catch (Exception e) {
-            throw new FileUploadException("Failed to update post: " + e.getMessage(), e);
+            throw new FileUploadException("Failed to update post: " + e.getMessage());
         }
     }
 

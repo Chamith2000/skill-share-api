@@ -1,5 +1,6 @@
 package com.paf.skillShareApi.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -25,13 +26,14 @@ public class RequestBoard {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @JsonBackReference("user-requestboards")
     private User user;
 
     @OneToMany(mappedBy = "requestBoard", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Bid> bids = new ArrayList<>();
 
-    @Column(name = "is_resolved") // Match the database column name
-    private boolean isResolved; // Ensure this field exists
+    @Column(name = "is_resolved")
+    private boolean isResolved;
 
     // Explicit setter to resolve the compilation error
     public void setIsResolved(boolean isResolved) {

@@ -11,6 +11,7 @@ import com.paf.skillShareApi.repository.CommentRepository;
 import com.paf.skillShareApi.repository.PostRepository;
 import com.paf.skillShareApi.repository.UserRepository;
 import com.paf.skillShareApi.service.CommentService;
+import com.paf.skillShareApi.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +32,9 @@ public class CommentServiceImpl implements CommentService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @Override
     public ResponseEntity<Map> createComment(Long postId, CreateCommentRequestDTO commentRequest) {
         if (commentRequest == null || commentRequest.getText() == null || commentRequest.getUid() == null) {
@@ -50,6 +54,9 @@ public class CommentServiceImpl implements CommentService {
         comment.setCreatedAt(new Date());
 
         Comment savedComment = commentRepository.save(comment);
+
+        // Create notification for the post owner
+        notificationService.createCommentNotification(user, post.getUser().getId());
 
         return ResponseEntity.ok(Map.of(
                 "message", "Comment created successfully",
@@ -106,5 +113,4 @@ public class CommentServiceImpl implements CommentService {
                 "message", "Comment deleted successfully"
         ));
     }
-
 }
