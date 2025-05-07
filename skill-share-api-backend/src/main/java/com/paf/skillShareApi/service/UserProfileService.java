@@ -8,4 +8,6 @@ public interface UserProfileService {
     User updateUserProfile(User updatedUser);
     String uploadProfileImage(Long userId, MultipartFile image);
     User updateUserProfileWithImage(User updatedUser, MultipartFile image);
+
 }
+

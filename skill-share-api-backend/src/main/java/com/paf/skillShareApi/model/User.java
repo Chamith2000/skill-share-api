@@ -73,4 +73,8 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference("user-bids")
     private List<Bid> bids = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<com.paf.skillShareApi.model.Authority> authorities;
+
 }

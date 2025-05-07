@@ -124,4 +124,6 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         return userRepository.save(updatedUser);
     }
+
 }
+

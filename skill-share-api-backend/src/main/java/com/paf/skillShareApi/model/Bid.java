@@ -1,5 +1,6 @@
 package com.paf.skillShareApi.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -22,14 +23,16 @@ public class Bid {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @JsonBackReference("user-bids")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "request_board_id")
+    @JsonBackReference("requestboard-bids")
     private RequestBoard requestBoard;
 
-    @Column(name = "is_accepted") // Match the database column name
-    private boolean isAccepted; // Ensure this field exists
+    @Column(name = "is_accepted")
+    private boolean isAccepted;
 
     // Explicit setter to resolve the compilation error
     public void setIsAccepted(boolean isAccepted) {

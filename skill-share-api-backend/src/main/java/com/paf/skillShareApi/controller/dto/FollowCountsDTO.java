@@ -10,4 +10,6 @@ import lombok.NoArgsConstructor;
 public class FollowCountsDTO {
     private Long followersCount;
     private Long followingCount;
+
 }
+
