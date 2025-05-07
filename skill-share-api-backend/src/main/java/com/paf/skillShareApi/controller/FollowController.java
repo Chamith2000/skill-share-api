@@ -44,5 +44,21 @@ public class FollowController {
         return new ResponseEntity<>(status, HttpStatus.OK);
     }
 
+    @GetMapping("/followers/{userId}")
+    public ResponseEntity<List<UserSummaryDTO>> getFollowers(@PathVariable Long userId) {
+        List<UserSummaryDTO> followers = followService.getFollowers(userId);
+        return new ResponseEntity<>(followers, HttpStatus.OK);
+    }
 
+    @GetMapping("/following/{userId}")
+    public ResponseEntity<List<UserSummaryDTO>> getFollowing(@PathVariable Long userId) {
+        List<UserSummaryDTO> following = followService.getFollowing(userId);
+        return new ResponseEntity<>(following, HttpStatus.OK);
+    }
+
+    @GetMapping("/counts/{userId}")
+    public ResponseEntity<FollowCountsDTO> getFollowCounts(@PathVariable Long userId) {
+        FollowCountsDTO counts = followService.getFollowCounts(userId);
+        return new ResponseEntity<>(counts, HttpStatus.OK);
+    }
 }

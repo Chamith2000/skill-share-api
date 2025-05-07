@@ -81,7 +81,38 @@ public class FollowServiceImpl implements FollowService {
         return followRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId);
     }
 
-    
+    @Override
+    public List<UserSummaryDTO> getFollowers(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        List<Follow> followers = followRepository.findByFolloweeId(userId);
+        return followers.stream()
+                .map(follow -> mapUserToSummaryDTO(follow.getFollower()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserSummaryDTO> getFollowing(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        List<Follow> following = followRepository.findByFollowerId(userId);
+        return following.stream()
+                .map(follow -> mapUserToSummaryDTO(follow.getFollowee()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public FollowCountsDTO getFollowCounts(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        long followersCount = followRepository.countByFolloweeId(userId);
+        long followingCount = followRepository.countByFollowerId(userId);
+
+        return new FollowCountsDTO(followersCount, followingCount);
+    }
 
     private UserSummaryDTO mapUserToSummaryDTO(User user) {
         return new UserSummaryDTO(

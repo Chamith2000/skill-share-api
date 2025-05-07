@@ -9,5 +9,7 @@ public interface FollowService {
     FollowResponseDTO followUser(Long followerId, Long followeeId);
     FollowResponseDTO unfollowUser(Long followerId, Long followeeId);
     boolean isFollowing(Long followerId, Long followeeId);
-
+    List<UserSummaryDTO> getFollowers(Long userId);
+    List<UserSummaryDTO> getFollowing(Long userId);
+    FollowCountsDTO getFollowCounts(Long userId);
 }
