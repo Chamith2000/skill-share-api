@@ -82,5 +82,23 @@ public class CommentServiceImpl implements CommentService {
         }
     }
 
+    public ResponseEntity<Map> updateComment(Long commentId, Long userId, UpdateCommentRequestDTO commentRequest) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentNotFoundException(commentId));
+
+        if(!comment.getUser().getId().equals(userId)) {
+            throw new UserNotAuthorizedException("User not authorized to edit this comment");
+        }
+
+        comment.setText(commentRequest.getText());
+        comment.setUpdatedAt(new Date());
+        Comment updatedComment = commentRepository.save(comment);
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Comment updated successfully",
+                "comment", new CommentDTO(updatedComment)
+        ));
+    }
+
 
 }
