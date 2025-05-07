@@ -83,6 +83,20 @@ public class CommentController {
         }
     }
 
-    
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<Map> deleteComment(
+            @PathVariable Long commentId,
+            @RequestHeader("userId") Long userId) {
+
+        try {
+            return commentService.deleteComment(commentId, userId);
+        } catch (CommentNotFoundException | UserNotAuthorizedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("error", "Deletion failed: " + e.getMessage()));
+        }
+    }
 
 }
