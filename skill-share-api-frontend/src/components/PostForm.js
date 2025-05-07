@@ -1,19 +1,29 @@
 import React, { useState } from 'react';
 import { createPost } from '../services/api';
-import './PostForm.css'; // We'll create this CSS file
+import './PostForm.css'; // Optional CSS file
 
-const PostForm = ({ userId }) => {
+const PostForm = () => {
     const [description, setDescription] = useState('');
     const [files, setFiles] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
 
+    // 👇 Get logged in user's ID from localStorage
+    const loggedUser = JSON.parse(localStorage.getItem("user"));
+    const userId = loggedUser?.id;
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
         setError(null);
         setSuccess(false);
+
+        if (!userId) {
+            setError('User is not logged in.');
+            setIsSubmitting(false);
+            return;
+        }
 
         try {
             const formData = new FormData();
@@ -84,7 +94,7 @@ const PostForm = ({ userId }) => {
 
                 <div className="form-group">
                     <label htmlFor="files" className="form-label">
-                        Add Media (max 5 files)
+                        Add Media (max 3 files)
                     </label>
                     <div className="file-upload-container">
                         <label htmlFor="file-upload" className="file-upload-label">
