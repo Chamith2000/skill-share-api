@@ -22,16 +22,5 @@ public class LikeController {
         return likeService.toggleLike(postId, userId);
     }
 
-    @GetMapping("/posts/{postId}/likes/{userId}/status")
-    public ResponseEntity<Map> getLikeStatus(
-            @PathVariable Long postId,
-            @PathVariable Long userId) {
-        return likeService.getLikeStatus(postId, userId);
-    }
 
-    @GetMapping("/posts/{postId}/likes/count")
-    public ResponseEntity<Map> getLikeCount(
-            @PathVariable Long postId) {
-        return likeService.getLikeCount(postId);
-    }
 }
