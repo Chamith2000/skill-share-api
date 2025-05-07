@@ -10,4 +10,3 @@ public class UpdateCommentRequestDTO {
     @Size(min = 1, max = 500)
     private String text;
 }
-

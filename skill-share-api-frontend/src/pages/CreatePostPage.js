@@ -8,10 +8,6 @@ const CreatePostPage = () => {
     return (
         <div>
             <Navbar/>
-            {/*<h1>Create a New Post</h1>*/}
-            <div>
-
-            </div>
             <PostForm userId={userId} />
         </div>
     );
