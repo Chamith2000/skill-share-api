@@ -4,7 +4,6 @@ import Navbar from "../components/Navbar";
 
 const HomePage = () => (
     <div className="home-page">
-        <h1>Feed</h1>
         <Navbar />
         <PostList />
     </div>

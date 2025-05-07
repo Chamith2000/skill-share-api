@@ -20,4 +20,3 @@ public class CommentDTO {
         this.createdAt = comment.getCreatedAt();
     }
 }
-
