@@ -60,6 +60,29 @@ public class CommentController {
         }
     }
 
+    // Optional Friendly Route: GET /comments/post/{postId}
+    @GetMapping("/post/{postId}")
+    public ResponseEntity<Map> getCommentsByPostFriendly(@PathVariable Long postId) {
+        return getAllCommentsByPostId(postId); // reuse same method
+    }
 
+    @PutMapping("/{commentId}")
+    public ResponseEntity<Map> updateComment(
+            @PathVariable Long commentId,
+            @RequestHeader("userId") Long userId, // Get user ID from header
+            @Valid @RequestBody UpdateCommentRequestDTO commentRequest) {
+
+        try {
+            return commentService.updateComment(commentId, userId, commentRequest);
+        } catch (CommentNotFoundException | UserNotAuthorizedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("error", "Update failed: " + e.getMessage()));
+        }
+    }
+
+    
 
 }
