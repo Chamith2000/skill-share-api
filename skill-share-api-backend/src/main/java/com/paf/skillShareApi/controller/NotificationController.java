@@ -26,5 +26,18 @@ public class NotificationController {
         return ResponseEntity.ok(new NotificationDTO(notification));
     }
 
-   
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<NotificationDTO>> getNotificationsByUserId(@PathVariable Long userId) {
+        List<Notification> notifications = notificationService.getNotificationsByUserId(userId);
+        List<NotificationDTO> notificationDTOs = notifications.stream()
+                .map(NotificationDTO::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(notificationDTOs);
+    }
+
+    @PutMapping("/{id}/read")
+    public ResponseEntity<Void> markAsRead(@PathVariable Long id) {
+        notificationService.markAsRead(id);
+        return ResponseEntity.ok().build();
+    }
 }
