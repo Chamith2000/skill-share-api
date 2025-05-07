@@ -64,5 +64,23 @@ public class CommentServiceImpl implements CommentService {
         ));
     }
 
+    @Override
+    public ResponseEntity<Map> getCommentsByPostId(Long postId) {
+        try {
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new PostNotFoundException(postId));
+
+            List<Comment> comments = commentRepository.findByPost(post);
+
+            return ResponseEntity.ok().body(Map.of(
+                    "comments", comments
+            ));
+        } catch (PostNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to retrieve comments: " + e.getMessage());
+        }
+    }
+
 
 }

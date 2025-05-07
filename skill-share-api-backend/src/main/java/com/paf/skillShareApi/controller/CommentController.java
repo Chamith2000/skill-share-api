@@ -45,6 +45,21 @@ public class CommentController {
         }
     }
 
+    // Existing route: GET /comments/{postId}
+    @GetMapping("/{postId}")
+    public ResponseEntity<Map> getAllCommentsByPostId(@PathVariable Long postId) {
+        try {
+            return commentService.getCommentsByPostId(postId);
+        } catch (PostNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Post not found", "details", e.getMessage()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Internal Server Error", "details", e.getMessage()));
+        }
+    }
+
 
 
 }
