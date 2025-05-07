@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import './Navbar.css';
-// Import bell icon - assuming you're using react-icons or similar
 import { FaBell } from 'react-icons/fa';
+import Logo from '../assets/app_logo.svg';
 
 const Navbar = () => {
     const [notifications, setNotifications] = useState([]);
@@ -12,23 +12,15 @@ const Navbar = () => {
     const navigate = useNavigate();
     const notificationRef = useRef(null);
 
-    // Fetch notifications on component mount
     useEffect(() => {
         fetchNotifications();
-
-        // Set up polling for notifications (every 30 seconds)
         const intervalId = setInterval(fetchNotifications, 30000);
-
-        // Add click event listener to close dropdown when clicking outside
         const handleClickOutside = (event) => {
             if (notificationRef.current && !notificationRef.current.contains(event.target)) {
                 setShowNotifications(false);
             }
         };
-
         document.addEventListener('mousedown', handleClickOutside);
-
-        // Clean up
         return () => {
             clearInterval(intervalId);
             document.removeEventListener('mousedown', handleClickOutside);
@@ -37,21 +29,14 @@ const Navbar = () => {
 
     const fetchNotifications = async () => {
         try {
-            // Get current user from localStorage
             const currentUser = JSON.parse(localStorage.getItem('user'));
-
             if (!currentUser || !currentUser.id) {
                 console.log('No user found in localStorage or missing ID');
                 return;
             }
-
             const response = await api.get(`/api/notifications/user/${currentUser.id}`);
-
-            // The response should now be a clean array of DTOs
             if (Array.isArray(response.data)) {
                 setNotifications(response.data);
-
-                // Calculate unread count
                 const unreadNotifications = response.data.filter(notification => !notification.read);
                 setUnreadCount(unreadNotifications.length);
             } else {
@@ -78,13 +63,11 @@ const Navbar = () => {
     const markAsRead = async (notificationId) => {
         try {
             await api.put(`/api/notifications/${notificationId}/read`);
-            // Update the local state to reflect the change
             setNotifications(notifications.map(notification =>
                 notification.id === notificationId
                     ? { ...notification, read: true }
                     : notification
             ));
-            // Update unread count
             setUnreadCount(prev => Math.max(0, prev - 1));
         } catch (error) {
             console.error('Error marking notification as read:', error);
@@ -95,6 +78,7 @@ const Navbar = () => {
         <nav className="navbar">
             <div className="navbar-container">
                 <Link to="/home-page" className="navbar-logo">
+                    <img src={Logo} alt="ArtHive Logo" />
                     ArtHive
                 </Link>
                 <ul className="nav-menu">
@@ -125,7 +109,6 @@ const Navbar = () => {
                                 <span className="notification-badge">{unreadCount}</span>
                             )}
                         </button>
-
                         {showNotifications && (
                             <div className="notification-dropdown">
                                 <div className="notification-header">

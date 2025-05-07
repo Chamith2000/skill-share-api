@@ -82,35 +82,5 @@ public class LikeServiceImpl implements LikeService {
         }
     }
 
-    @Override
-    public ResponseEntity<Map> getLikeStatus(Long postId, Long userId) {
-        try {
-            boolean isLiked = likeRepository.existsByPostIdAndUserId(postId, userId);
-            long likeCount = likeRepository.countByPostId(postId);
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("liked", isLiked);
-            response.put("likeCount", likeCount);
-
-            return ResponseEntity.ok().body(response);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to get like status: " + e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public ResponseEntity<Map> getLikeCount(Long postId) {
-        try {
-            long likeCount = likeRepository.countByPostId(postId);
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("likeCount", likeCount);
-
-            return ResponseEntity.ok().body(response);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to get like count: " + e.getMessage(), e);
-        }
-    }
 }
