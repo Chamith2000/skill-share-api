@@ -100,5 +100,17 @@ public class CommentServiceImpl implements CommentService {
         ));
     }
 
+    public ResponseEntity<Map> deleteComment(Long commentId, Long userId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CommentNotFoundException(commentId));
 
+        if(!comment.getUser().getId().equals(userId)) {
+            throw new UserNotAuthorizedException("User not authorized to delete this comment");
+        }
+
+        commentRepository.delete(comment);
+        return ResponseEntity.ok(Map.of(
+                "message", "Comment deleted successfully"
+        ));
+    }
 }
