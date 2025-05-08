@@ -3,6 +3,7 @@ package com.paf.skillShareApi.service.impl;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.paf.skillShareApi.controller.request.CreatePostRequestDTO;
+import com.paf.skillShareApi.exception.InvalidMediaException;
 import com.paf.skillShareApi.exception.InvalidPostContentException;
 import com.paf.skillShareApi.exception.PostNotFoundException;
 import com.paf.skillShareApi.exception.UserNotFoundException;
@@ -11,17 +12,27 @@ import com.paf.skillShareApi.repository.MediaRepository;
 import com.paf.skillShareApi.repository.PostRepository;
 import com.paf.skillShareApi.repository.UserRepository;
 import com.paf.skillShareApi.service.PostService;
+import org.apache.commons.codec.EncoderException;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import ws.schild.jave.MultimediaObject;
+import ws.schild.jave.info.MultimediaInfo;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class PostServiceImpl implements PostService {
+
+    // Add the missing constant declaration
+    private static final int MAX_VIDEO_DURATION_SECONDS = 30; // 1 minute max duration
 
     @Autowired
     private PostRepository postRepository;
@@ -53,20 +64,33 @@ public class PostServiceImpl implements PostService {
 
             if (postRequest.getFiles() != null && !postRequest.getFiles().isEmpty()) {
                 for (int i = 0; i < Math.min(postRequest.getFiles().size(), 3); i++) {
-                    var file = postRequest.getFiles().get(i);
+                    MultipartFile file = postRequest.getFiles().get(i);
+                    String contentType = file.getContentType();
+                    boolean isVideo = contentType != null && contentType.startsWith("video");
+
+                    // Validate video duration
+                    if (isVideo) {
+                        validateVideoDuration(file);
+                    }
+
+                    Map uploadOptions = new HashMap();
+                    if (isVideo) {
+                        // Set specific options for video uploads if needed
+                        uploadOptions.put("resource_type", "video");
+                    }
+
                     Map uploadResult = cloudinary.uploader().upload(
                             file.getBytes(),
-                            ObjectUtils.emptyMap()
+                            uploadOptions
                     );
 
                     String uploadedUrl = (String) uploadResult.get("secure_url");
-                    String publicId = (String) uploadResult.get("public_id"); // Get the public_id from Cloudinary
+                    String publicId = (String) uploadResult.get("public_id");
 
                     Media media = new Media();
                     media.setUrl(uploadedUrl);
-                    media.setCloudinaryPublicId(publicId); // Set the public_id
-                    String contentType = file.getContentType();
-                    media.setMediaType(contentType != null && contentType.startsWith("video") ? "video" : "image");
+                    media.setCloudinaryPublicId(publicId);
+                    media.setMediaType(isVideo ? "video" : "image");
                     media.setUploadedAt(LocalDateTime.now());
                     media.setPost(post);
                     mediaRepository.save(media);
@@ -78,10 +102,43 @@ public class PostServiceImpl implements PostService {
             response.put("postId", post.getId());
             return ResponseEntity.ok().body(response);
 
-        } catch (UserNotFoundException | InvalidPostContentException e) {
+        } catch (UserNotFoundException | InvalidPostContentException | InvalidMediaException e) {
             throw e;
         } catch (Exception e) {
             throw new RuntimeException("Failed to create post: " + e.getMessage(), e);
+        }
+    }
+
+    private void validateVideoDuration(MultipartFile videoFile) throws InvalidMediaException {
+        if (videoFile == null || !videoFile.getContentType().startsWith("video")) {
+            return;
+        }
+
+        File tempFile = null;
+        try {
+            // Create a temporary file
+            tempFile = File.createTempFile("video-upload", ".tmp");
+            FileOutputStream fos = new FileOutputStream(tempFile);
+            fos.write(videoFile.getBytes());
+            fos.close();
+
+            // Get video duration using jave library
+            MultimediaObject multimediaObject = new MultimediaObject(tempFile);
+            MultimediaInfo info = multimediaObject.getInfo();
+            long durationInSeconds = info.getDuration() / 1000;
+
+            if (durationInSeconds > MAX_VIDEO_DURATION_SECONDS) {
+                throw new InvalidMediaException("Video duration exceeds maximum allowed limit of " +
+                        MAX_VIDEO_DURATION_SECONDS + " seconds (Actual: " +
+                        durationInSeconds + " seconds)");
+            }
+        } catch (IOException | ws.schild.jave.EncoderException e) {
+            throw new InvalidMediaException("Failed to validate video file: " + e.getMessage());
+        } finally {
+            // Clean up the temporary file
+            if (tempFile != null && tempFile.exists()) {
+                tempFile.delete();
+            }
         }
     }
 

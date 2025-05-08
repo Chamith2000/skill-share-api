@@ -1,26 +1,41 @@
 import React, { useState } from 'react';
 import { updateComment, deleteComment } from '../services/api';
+import './CommentItem.css';
 
 const CommentItem = ({ comment, postId, currentUserId, refreshComments }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editedText, setEditedText] = useState(comment.text);
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(null);
 
     const handleUpdate = async () => {
+        if (!editedText.trim()) {
+            setError('Comment cannot be empty');
+            return;
+        }
         try {
+            setError(null);
             await updateComment(postId, comment.id, { text: editedText });
             setIsEditing(false);
-            refreshComments();  // Function to refresh comments after updating
+            setSuccess('Comment updated successfully!');
+            refreshComments();
+            setTimeout(() => setSuccess(null), 3000);
         } catch (err) {
+            setError('Failed to update comment');
             console.error('Update failed:', err);
         }
     };
 
     const handleDelete = async () => {
-        if(window.confirm('Delete this comment permanently?')) {
+        if (window.confirm('Delete this comment permanently?')) {
             try {
+                setError(null);
                 await deleteComment(postId, comment.id);
-                refreshComments();  // Function to refresh comments after deleting
+                setSuccess('Comment deleted successfully!');
+                refreshComments();
+                setTimeout(() => setSuccess(null), 3000);
             } catch (err) {
+                setError('Failed to delete comment');
                 console.error('Delete failed:', err);
             }
         }
@@ -28,28 +43,55 @@ const CommentItem = ({ comment, postId, currentUserId, refreshComments }) => {
 
     return (
         <div className="comment-item">
+            {error && <div className="alert alert-error">{error}</div>}
+            {success && <div className="alert alert-success">{success}</div>}
             {isEditing ? (
-                <>
+                <div className="edit-comment">
                     <textarea
                         value={editedText}
                         onChange={(e) => setEditedText(e.target.value)}
+                        className="comment-textarea"
+                        rows="3"
+                        aria-label="Edit comment"
                     />
-                    <button onClick={handleUpdate}>Save</button>
-                    <button onClick={() => setIsEditing(false)}>Cancel</button>
-                </>
+                    <div className="comment-actions">
+                        <button onClick={handleUpdate} className="save-btn" aria-label="Save comment">
+                            Save
+                        </button>
+                        <button
+                            onClick={() => setIsEditing(false)}
+                            className="cancel-btn"
+                            aria-label="Cancel editing"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
             ) : (
                 <>
                     <div className="comment-header">
-                        <strong>{comment.username}</strong>
+                        <strong className="comment-username">{comment.user.username || comment.user.name || 'User'}</strong>
                         {currentUserId === comment.user.id && (
                             <div className="comment-actions">
-                                <button onClick={() => setIsEditing(true)}>✏️</button>
-                                <button onClick={handleDelete}>🗑️</button>
+                                <button
+                                    onClick={() => setIsEditing(true)}
+                                    className="edit-btn"
+                                    aria-label="Edit comment"
+                                >
+                                    Edit
+                                </button>
+                                <button
+                                    onClick={handleDelete}
+                                    className="delete-btn"
+                                    aria-label="Delete comment"
+                                >
+                                    Delete
+                                </button>
                             </div>
                         )}
                     </div>
-                    <p>{comment.text}</p>
-                    <small>
+                    <p className="comment-text">{comment.text}</p>
+                    <small className="comment-meta">
                         {new Date(comment.createdAt).toLocaleString()}
                         {comment.updatedAt && ` (Edited)`}
                     </small>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { likePost } from '../services/api';
 import CommentList from './CommentList';
+import './Post.css'; // Add this line
 
 const Post = ({ post }) => {
     const [likes, setLikes] = useState(post.likeCount);
@@ -17,7 +18,7 @@ const Post = ({ post }) => {
             <h3>{post.user.name}</h3>
             <p>{post.description}</p>
             {post.media.map((media, index) => (
-                <div key={index}>
+                <div key={index} className="media">
                     {media.mediaType === 'image' ? (
                         <img src={media.url} alt="Media" style={{ maxWidth: '100%' }} />
                     ) : (

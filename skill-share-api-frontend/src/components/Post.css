@@ -1,0 +1,143 @@
+.post {
+    background-color: #fff;
+    border: 1px solid #dbdbdb;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    max-width: 100%; /* Takes full width of parent container */
+    width: 100%; /* Ensures post takes available width */
+    margin-bottom: 25px; /* Space between posts, matching PostList.css */
+}
+
+.post:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Post header (username) */
+.post h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    padding: 15px;
+    border-bottom: 1px solid #dbdbdb;
+}
+
+/* Post description */
+.post p {
+    font-size: 15px;
+    line-height: 1.5;
+    color: #333;
+    padding: 15px;
+    margin: 0;
+}
+
+/* Media section */
+.post .media {
+    width: 100%;
+    padding: 0;
+}
+
+.post img,
+.post video {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.post img:hover,
+.post video:hover {
+    transform: scale(1.05);
+}
+
+/* Fallback for media */
+.post .media > div {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 16 / 9; /* Default aspect ratio for media */
+}
+
+/* Actions section */
+.actions {
+    display: flex;
+    gap: 20px;
+    padding: 15px;
+    border-top: 1px solid #f1f1f1;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.actions button {
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.3s ease;
+    padding: 8px 12px;
+    border-radius: 20px;
+    color: #333;
+}
+
+.actions button:hover {
+    background-color: #f5f5f5;
+    transform: translateY(-2px);
+}
+
+.actions button:first-child {
+    color: #e53935; /* Like button color */
+}
+
+.actions button:first-child:hover {
+    background-color: #ffebee;
+}
+
+.actions button:nth-child(2) {
+    color: #3897f0; /* Comments button color */
+}
+
+.actions button:nth-child(2):hover {
+    background-color: #f0f7fb;
+}
+
+.actions button:last-child {
+    color: #4caf50; /* Share button color */
+}
+
+.actions button:last-child:hover {
+    background-color: #e8f5e9;
+}
+
+/* Comments section (loaded via CommentList component) */
+.post .comment-list {
+    padding: 15px;
+    background-color: #fafafa;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .post {
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+
+    .post h3,
+    .post p {
+        padding: 10px;
+    }
+
+    .actions {
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .actions button {
+        font-size: 14px;
+        padding: 6px 10px;
+    }
+}

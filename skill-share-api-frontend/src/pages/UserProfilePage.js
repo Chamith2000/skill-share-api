@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getUserProfile, updateUserProfileFull } from '../services/api';
 import './UserProfile.css';
-import Navbar from "../components/Navbar";
+import Navbar from '../components/Navbar';
 
 const UserProfilePage = () => {
     const [user, setUser] = useState({
@@ -12,13 +12,14 @@ const UserProfilePage = () => {
         profileImageUrl: '',
         skillLevel: '',
         craftTokens: 0,
-        password: '' // 👉 Add password field
+        password: ''
     });
 
     const [isEditing, setIsEditing] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(null);
     const [saving, setSaving] = useState(false);
     const [imagePreview, setImagePreview] = useState(null);
 
@@ -57,6 +58,10 @@ const UserProfilePage = () => {
 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
+        if (file && file.size > 5 * 1024 * 1024) { // 5MB limit
+            setError('Image file size exceeds 5MB limit');
+            return;
+        }
         setSelectedFile(file);
 
         if (file) {
@@ -74,6 +79,7 @@ const UserProfilePage = () => {
         try {
             setSaving(true);
             setError(null);
+            setSuccess(null);
 
             const profileData = {
                 id: user.id,
@@ -83,19 +89,19 @@ const UserProfilePage = () => {
                 skillLevel: user.skillLevel
             };
 
-            // Only include password if not empty
             if (user.password && user.password.trim() !== '') {
                 profileData.password = user.password;
             }
 
             const response = await updateUserProfileFull(userId, profileData, selectedFile);
 
-            // Clear password field after save
             setUser({ ...response.data, password: '' });
             setIsEditing(false);
             setSelectedFile(null);
             setImagePreview(null);
+            setSuccess('Profile updated successfully!');
             setSaving(false);
+            setTimeout(() => setSuccess(null), 3000); // Clear success after 3s
         } catch (err) {
             setError('Failed to update profile: ' + (err.response?.data?.message || err.message));
             setSaving(false);
@@ -104,22 +110,34 @@ const UserProfilePage = () => {
     };
 
     if (loading) {
-        return <div className="loading">Loading profile...</div>;
+        return (
+            <div className="loading">
+                <span className="loading-spinner"></span>
+                Loading profile...
+            </div>
+        );
     }
 
     if (error) {
         return (
-            <div>
-                <div className="error">{error}</div>
-                <button onClick={fetchUserData} className="retry-btn">Retry</button>
+            <div className="error-container">
+                <div className="alert alert-error">{error}</div>
+                <button onClick={fetchUserData} className="retry-btn" aria-label="Retry loading profile">
+                    Retry
+                </button>
             </div>
         );
     }
 
     return (
         <div>
-            <Navbar/>
+            <Navbar />
             <div className="profile-container">
+                {success && (
+                    <div className="alert alert-success success-animation">
+                        {success}
+                    </div>
+                )}
                 <div className="profile-header">
                     <div className="profile-image-container">
                         {imagePreview ? (
@@ -140,6 +158,7 @@ const UserProfilePage = () => {
                                     className="file-input"
                                     accept="image/*"
                                     id="profile-image-input"
+                                    aria-label="Upload profile image"
                                 />
                                 <label htmlFor="profile-image-input" className="file-input-label">
                                     Choose Image
@@ -151,12 +170,12 @@ const UserProfilePage = () => {
                     <div className="profile-info">
                         <h1>{user.username}</h1>
                         <div className="profile-details">
-                        <span className="craft-tokens">
-                            <i className="token-icon">🪙</i> {user.craftTokens} Craft Tokens
-                        </span>
+                            <span className="craft-tokens">
+                                <i className="token-icon">🪙</i> {user.craftTokens} Craft Tokens
+                            </span>
                             <span className="skill-level">
-                            Level: {user.skillLevel || 'Not set'}
-                        </span>
+                                Level: {user.skillLevel || 'Not set'}
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -165,52 +184,63 @@ const UserProfilePage = () => {
                     {isEditing ? (
                         <div className="edit-form">
                             <div className="form-group">
-                                <label>Username</label>
+                                <label htmlFor="username">Username</label>
                                 <input
+                                    id="username"
                                     type="text"
                                     name="username"
                                     value={user.username || ''}
                                     onChange={handleInputChange}
+                                    required
+                                    aria-required="true"
                                 />
                             </div>
 
                             <div className="form-group">
-                                <label>Email</label>
+                                <label htmlFor="email">Email</label>
                                 <input
+                                    id="email"
                                     type="email"
                                     name="email"
                                     value={user.email || ''}
                                     onChange={handleInputChange}
+                                    required
+                                    aria-required="true"
                                 />
                             </div>
 
                             <div className="form-group">
-                                <label>New Password</label>
+                                <label htmlFor="password">New Password</label>
                                 <input
+                                    id="password"
                                     type="password"
                                     name="password"
                                     value={user.password || ''}
                                     onChange={handleInputChange}
-                                    placeholder="Enter new password"
+                                    placeholder="Enter new password (optional)"
                                 />
                             </div>
 
                             <div className="form-group">
-                                <label>Bio</label>
+                                <label htmlFor="bio">Bio</label>
                                 <textarea
+                                    id="bio"
                                     name="bio"
                                     value={user.bio || ''}
                                     onChange={handleInputChange}
                                     rows="4"
+                                    aria-label="User bio"
                                 />
                             </div>
 
                             <div className="form-group">
-                                <label>Skill Level</label>
+                                <label htmlFor="skillLevel">Skill Level</label>
                                 <select
+                                    id="skillLevel"
                                     name="skillLevel"
                                     value={user.skillLevel || ''}
                                     onChange={handleInputChange}
+                                    aria-label="Select skill level"
                                 >
                                     <option value="">Select Skill Level</option>
                                     <option value="BEGINNER">Beginner</option>
@@ -221,8 +251,20 @@ const UserProfilePage = () => {
                             </div>
 
                             <div className="button-group">
-                                <button onClick={saveProfile} className="save-btn" disabled={saving}>
-                                    {saving ? 'Saving...' : 'Save Profile'}
+                                <button
+                                    onClick={saveProfile}
+                                    className="save-btn"
+                                    disabled={saving}
+                                    aria-label="Save profile changes"
+                                >
+                                    {saving ? (
+                                        <>
+                                            <span className="loading-spinner"></span>
+                                            Saving...
+                                        </>
+                                    ) : (
+                                        'Save Profile'
+                                    )}
                                 </button>
                                 <button
                                     onClick={() => {
@@ -234,6 +276,7 @@ const UserProfilePage = () => {
                                     }}
                                     className="cancel-btn"
                                     disabled={saving}
+                                    aria-label="Cancel editing"
                                 >
                                     Cancel
                                 </button>
@@ -251,7 +294,11 @@ const UserProfilePage = () => {
                                 <p>Email: {user.email}</p>
                             </div>
 
-                            <button onClick={() => setIsEditing(true)} className="edit-btn">
+                            <button
+                                onClick={() => setIsEditing(true)}
+                                className="edit-btn"
+                                aria-label="Edit profile"
+                            >
                                 Edit Profile
                             </button>
                         </div>

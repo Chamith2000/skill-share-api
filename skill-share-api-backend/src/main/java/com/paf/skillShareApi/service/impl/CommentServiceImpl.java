@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class CommentServiceImpl implements CommentService {
@@ -60,7 +61,7 @@ public class CommentServiceImpl implements CommentService {
 
         return ResponseEntity.ok(Map.of(
                 "message", "Comment created successfully",
-                "commentId", savedComment.getId()
+                "comment", new CommentDTO(savedComment)
         ));
     }
 
@@ -71,9 +72,12 @@ public class CommentServiceImpl implements CommentService {
                     .orElseThrow(() -> new PostNotFoundException(postId));
 
             List<Comment> comments = commentRepository.findByPost(post);
+            List<CommentDTO> commentDTOs = comments.stream()
+                    .map(CommentDTO::new)
+                    .collect(Collectors.toList());
 
             return ResponseEntity.ok().body(Map.of(
-                    "comments", comments
+                    "comments", commentDTOs
             ));
         } catch (PostNotFoundException e) {
             throw e;
@@ -82,11 +86,12 @@ public class CommentServiceImpl implements CommentService {
         }
     }
 
+    @Override
     public ResponseEntity<Map> updateComment(Long commentId, Long userId, UpdateCommentRequestDTO commentRequest) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
 
-        if(!comment.getUser().getId().equals(userId)) {
+        if (!comment.getUser().getId().equals(userId)) {
             throw new UserNotAuthorizedException("User not authorized to edit this comment");
         }
 
@@ -100,11 +105,12 @@ public class CommentServiceImpl implements CommentService {
         ));
     }
 
+    @Override
     public ResponseEntity<Map> deleteComment(Long commentId, Long userId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CommentNotFoundException(commentId));
 
-        if(!comment.getUser().getId().equals(userId)) {
+        if (!comment.getUser().getId().equals(userId)) {
             throw new UserNotAuthorizedException("User not authorized to delete this comment");
         }
 

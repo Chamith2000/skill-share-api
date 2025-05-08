@@ -1,6 +1,7 @@
 package com.paf.skillShareApi.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -19,17 +20,20 @@ public class RequestBoard {
     private Long id;
 
     private String title;
+
+    @Column(length = 1000)
     private String description;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER) // Changed to EAGER to ensure user data is loaded
     @JoinColumn(name = "user_id")
     @JsonBackReference("user-requestboards")
     private User user;
 
-    @OneToMany(mappedBy = "requestBoard", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "requestBoard", cascade = CascadeType.ALL)
+    @JsonManagedReference("requestboard-bids")
     private List<Bid> bids = new ArrayList<>();
 
     @Column(name = "is_resolved")

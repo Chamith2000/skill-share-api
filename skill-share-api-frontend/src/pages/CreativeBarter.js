@@ -51,14 +51,15 @@ const CreativeBarter = () => {
     const fetchRequestDetails = async (requestId) => {
         setLoading(true);
         try {
-            // In a real scenario, you might need separate API calls for bids
-            // Using mock data for demonstration
+            // Get the request details with bids that now include complete user information
+            const bidsResponse = await axios.get(`http://localhost:8080/api/creative-barter/requests/${requestId}/bids`);
+            setBids(bidsResponse.data);
+            setError(null);
+        } catch (err) {
+            console.error('Error fetching request details:', err);
+            setError('Failed to load request details. Please try again later.');
 
-            // Get bids for this request (this would be an actual API call)
-            // const bidsResponse = await axios.get(`http://localhost:8080/api/creative-barter/requests/${requestId}/bids`);
-            // setBids(bidsResponse.data);
-
-            // Mock bids data
+            // Fallback to mock data if API fails
             setBids([
                 {
                     id: 1,
@@ -75,11 +76,6 @@ const CreativeBarter = () => {
                     isAccepted: false
                 }
             ]);
-
-            setError(null);
-        } catch (err) {
-            console.error('Error fetching request details:', err);
-            setError('Failed to load request details. Please try again later.');
         } finally {
             setLoading(false);
         }
@@ -151,7 +147,7 @@ const CreativeBarter = () => {
                 }
             );
 
-            // Add new bid to list
+            // Add new bid to list - no need to manually add user info as it now comes from the server
             setBids([...bids, response.data]);
             setNewBid('');
             setSuccessMessage('Your solution has been submitted successfully!');
@@ -205,6 +201,12 @@ const CreativeBarter = () => {
     const viewRequestDetails = (request) => {
         setSelectedRequest(request);
         setActiveTab('detail');
+    };
+
+    // Helper function to get username safely
+    const getUsername = (user) => {
+        if (!user) return "Anonymous";
+        return user.username || "Anonymous";
     };
 
     return (
@@ -269,9 +271,9 @@ const CreativeBarter = () => {
                                         </div>
                                         <p className="request-description">{request.description}</p>
                                         <div className="request-footer">
-                    <span className="request-date">
-                      Posted: {new Date(request.createdAt).toLocaleDateString()}
-                    </span>
+                                            <span className="request-date">
+                                              Posted: {new Date(request.createdAt).toLocaleDateString()}
+                                            </span>
                                             <button
                                                 className="view-button"
                                                 onClick={() => viewRequestDetails(request)}
@@ -358,7 +360,7 @@ const CreativeBarter = () => {
                             </div>
 
                             <p className="detail-meta">
-                                Posted by: {selectedRequest.user?.username || 'Anonymous'} •
+                                Posted by: {getUsername(selectedRequest.user)} •
                                 {new Date(selectedRequest.createdAt).toLocaleDateString()}
                             </p>
 
@@ -383,7 +385,7 @@ const CreativeBarter = () => {
                                             >
                                                 <div className="solution-header">
                                                     <div>
-                                                        <p className="solution-author">{bid.user?.username || 'Anonymous'}</p>
+                                                        <p className="solution-author">{getUsername(bid.user)}</p>
                                                         <p className="solution-date">
                                                             {new Date(bid.createdAt).toLocaleDateString()}
                                                         </p>
@@ -421,13 +423,13 @@ const CreativeBarter = () => {
                                 <div className="submit-solution">
                                     <h3>Submit Your Solution</h3>
                                     <form onSubmit={handleSubmitBid}>
-                  <textarea
-                      value={newBid}
-                      onChange={(e) => setNewBid(e.target.value)}
-                      rows="5"
-                      placeholder="Share your creative solution here..."
-                      disabled={!user || loading}
-                  />
+                                          <textarea
+                                              value={newBid}
+                                              onChange={(e) => setNewBid(e.target.value)}
+                                              rows="5"
+                                              placeholder="Share your creative solution here..."
+                                              disabled={!user || loading}
+                                          />
 
                                         <div className="form-actions">
                                             <button

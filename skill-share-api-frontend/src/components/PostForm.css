@@ -1,66 +1,70 @@
-/* PostForm.css */
 .post-form-container {
-    max-width: 600px;
+    max-width: 900px; /* Increased from 600px to match PostList.css */
     margin: 5rem auto;
-    padding: 2rem;
+    padding: 2.5rem; /* Slightly increased padding for spacious feel */
     background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 12px; /* Matches PostList.css */
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.12); /* Matches PostList.css */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .post-form-container:hover {
-    transform: translateY(-5px);
+    transform: translateY(-3px); /* Matches PostList.css hover effect */
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
 }
 
 .form-title {
-    font-size: 1.8rem;
-    color: #2c3e50;
-    margin-bottom: 1.5rem;
+    font-size: 2rem; /* Slightly larger for prominence */
+    color: #333; /* Matches PostList.css */
+    margin-bottom: 2rem;
     text-align: center;
-    position: relative;
-    padding-bottom: 10px;
     font-weight: 600;
     letter-spacing: 0.5px;
+    position: relative;
+    padding-bottom: 12px;
 }
 
 .form-title::after {
     content: '';
+    width: 80px; /* Slightly wider for balance */
+    height: 4px;
+    background: linear-gradient(to right, #3897f0, #e53935); /* Matches PostList.css colors */
+    margin: 12px auto 0;
+    border-radius: 4px;
     display: block;
-    width: 60px;
-    height: 3px;
-    background: linear-gradient(to right, #3498db, #2ecc71);
-    margin: 10px auto 0;
-    border-radius: 3px;
 }
 
 .post-form {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 2rem; /* Increased for better spacing */
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
     position: relative;
 }
 
 .form-label {
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: #34495e;
     font-weight: 500;
-    transition: color 0.3s ease;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.form-label:hover {
+    color: #3897f0; /* Matches PostList.css comment button color */
+    transform: translateX(3px); /* Subtle interactivity */
 }
 
 .form-label:before {
     content: '✏️';
-    font-size: 0.9rem;
+    font-size: 1rem;
 }
 
 .form-label[for="files"]:before {
@@ -69,33 +73,33 @@
 
 .form-textarea {
     width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    padding: 15px;
+    border: 1px solid #dbdbdb; /* Matches PostList.css */
+    border-radius: 8px; /* Softer corners */
     font-size: 1rem;
     resize: vertical;
-    min-height: 120px;
+    min-height: 140px; /* Slightly taller for better UX */
     transition: all 0.3s ease;
-    background-color: #f9f9f9;
+    background-color: #fafafa; /* Matches PostList.css comments section */
 }
 
 .form-textarea:focus {
     outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    border-color: #3897f0;
+    box-shadow: 0 0 0 3px rgba(56, 151, 240, 0.2);
     background-color: #fff;
 }
 
 .form-textarea::placeholder {
-    color: #95a5a6;
+    color: #8e8e8e; /* Matches PostList.css */
     font-style: italic;
 }
 
 .character-count {
-    font-size: 0.8rem;
-    color: #7f8c8d;
+    font-size: 0.85rem;
+    color: #8e8e8e;
     text-align: right;
-    margin-top: 4px;
+    margin-top: 6px;
     transition: color 0.3s ease;
 }
 
@@ -104,11 +108,11 @@
 }
 
 .character-count.danger {
-    color: #e74c3c;
+    color: #e53935; /* Matches PostList.css like button */
 }
 
 .file-upload-container {
-    margin-top: 0.5rem;
+    margin-top: 0.75rem;
 }
 
 .file-upload-label {
@@ -116,34 +120,42 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 2rem;
-    border: 2px dashed #bdc3c7;
-    border-radius: 6px;
+    padding: 2.5rem;
+    border: 2px dashed #dbdbdb; /* Matches PostList.css borders */
+    border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
     text-align: center;
-    background-color: #f9f9f9;
+    background-color: #fafafa;
 }
 
 .file-upload-label:hover {
-    border-color: #3498db;
-    background-color: #f0f8ff;
+    border-color: #3897f0;
+    background-color: #f0f7fb; /* Matches PostList.css hover */
+    transform: scale(1.01); /* Subtle zoom for interactivity */
 }
 
 .file-upload-label.dragging {
     background-color: #e3f2fd;
     border-color: #2196f3;
+    transform: scale(1.02);
 }
 
 .upload-icon {
-    font-size: 2rem;
-    color: #3498db;
-    margin-bottom: 0.5rem;
+    font-size: 2.5rem;
+    color: #3897f0;
+    margin-bottom: 0.75rem;
     transition: transform 0.3s ease;
 }
 
 .file-upload-label:hover .upload-icon {
-    transform: scale(1.2);
+    transform: scale(1.3) rotate(10deg); /* Playful animation */
+}
+
+.upload-help-text {
+    font-size: 0.85rem;
+    color: #8e8e8e;
+    margin-top: 0.5rem;
 }
 
 .file-input {
@@ -151,17 +163,29 @@
 }
 
 .file-preview-container {
-    margin-top: 1rem;
-    border: 1px solid #eee;
-    border-radius: 6px;
-    padding: 1rem;
-    background-color: #f9f9f9;
+    margin-top: 1.5rem;
+    border: 1px solid #dbdbdb;
+    border-radius: 8px;
+    padding: 1.5rem;
+    background-color: #fafafa;
+    animation: slideIn 0.3s ease; /* Smooth appearance */
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .preview-title {
-    font-size: 0.9rem;
-    color: #7f8c8d;
-    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    color: #34495e;
+    margin-bottom: 1rem;
     font-weight: 500;
     display: flex;
     align-items: center;
@@ -169,105 +193,123 @@
 
 .preview-title:before {
     content: '📂';
-    margin-right: 0.5rem;
+    margin-right: 0.75rem;
 }
 
 .file-previews {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    max-height: 200px;
+    gap: 0.75rem;
+    max-height: 240px;
     overflow-y: auto;
 }
 
 .file-previews::-webkit-scrollbar {
-    width: 5px;
+    width: 6px;
 }
 
 .file-previews::-webkit-scrollbar-track {
     background: #f1f1f1;
-    border-radius: 5px;
+    border-radius: 6px;
 }
 
 .file-previews::-webkit-scrollbar-thumb {
-    background: #bdc3c7;
-    border-radius: 5px;
+    background: #3897f0;
+    border-radius: 6px;
 }
 
 .file-previews::-webkit-scrollbar-thumb:hover {
-    background: #95a5a6;
+    background: #1877f2;
 }
 
 .file-preview {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem;
+    padding: 1rem;
     background: #fff;
-    border-radius: 4px;
-    border-left: 3px solid #3498db;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease;
+    border-radius: 6px;
+    border-left: 4px solid #3897f0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .file-preview:hover {
     transform: translateX(5px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 
 .file-info {
     display: flex;
-    flex-direction: column;
+    align-items: center; /* Changed to align items horizontally */
     overflow: hidden;
     flex: 1;
+    gap: 10px; /* Space between icon, name, and size */
+}
+
+.file-type-icon {
+    font-size: 1.5rem;
+    color: #3897f0;
 }
 
 .file-name {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: #2c3e50;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     font-weight: 500;
+    flex: 1; /* Takes available space */
 }
 
 .file-size {
+    font-size: 0.85rem;
+    color: #8e8e8e;
+    margin-left: 10px; /* Space between name and size */
+}
+
+.file-tag {
     font-size: 0.8rem;
-    color: #7f8c8d;
+    color: #fff;
+    background: #3897f0;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 10px;
 }
 
 .remove-file-btn {
     background: none;
     border: none;
-    color: #e74c3c;
-    font-size: 1.2rem;
+    color: #e53935; /* Matches PostList.css like button */
+    font-size: 1.4rem;
     cursor: pointer;
-    padding: 0 0.5rem;
+    padding: 0.5rem;
     transition: all 0.2s ease;
     border-radius: 50%;
+    width: 30px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 24px;
 }
 
 .remove-file-btn:hover {
-    background-color: #ffebee;
-    transform: scale(1.2);
+    background-color: #ffebee; /* Matches PostList.css like button hover */
+    transform: scale(1.2) rotate(90deg); /* Playful animation */
 }
 
 .submit-btn {
-    padding: 12px 24px;
-    background: linear-gradient(to right, #3498db, #2980b9);
+    padding: 14px 30px;
+    background: linear-gradient(to right, #3897f0, #1877f2); /* Matches PostList.css comment button */
     color: white;
     border: none;
-    border-radius: 6px;
-    font-size: 1rem;
-    font-weight: 500;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
     align-self: flex-end;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
     position: relative;
     overflow: hidden;
 }
@@ -279,8 +321,8 @@
     left: 0;
     width: 0;
     height: 100%;
-    background: rgba(255, 255, 255, 0.2);
-    transition: width 0.3s ease;
+    background: rgba(255, 255, 255, 0.3);
+    transition: width 0.4s ease;
 }
 
 .submit-btn:hover:not(:disabled):before {
@@ -288,13 +330,13 @@
 }
 
 .submit-btn:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
 }
 
 .submit-btn:active:not(:disabled) {
-    transform: translateY(1px);
-    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .submit-btn:disabled {
@@ -304,10 +346,10 @@
 }
 
 .alert {
-    padding: 0.75rem 1rem;
-    border-radius: 4px;
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
+    padding: 1rem 1.5rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
     display: flex;
     align-items: center;
     position: relative;
@@ -317,7 +359,7 @@
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateY(-15px);
     }
     to {
         opacity: 1;
@@ -326,12 +368,12 @@
 }
 
 .alert:before {
-    margin-right: 0.5rem;
-    font-size: 1rem;
+    margin-right: 0.75rem;
+    font-size: 1.2rem;
 }
 
 .alert-success {
-    background: #d4edda;
+    background: #d4edda; /* Matches PostList.css green tones */
     color: #155724;
     border: 1px solid #c3e6cb;
 }
@@ -341,7 +383,7 @@
 }
 
 .alert-error {
-    background: #f8d7da;
+    background: #f8d7da; /* Matches PostList.css red tones */
     color: #721c24;
     border: 1px solid #f5c6cb;
 }
@@ -352,30 +394,25 @@
 
 /* Animations */
 @keyframes pulse {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
-    }
-    100% {
-        transform: scale(1);
-    }
+    0% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+    100% { transform: scale(1); }
 }
 
 .success-animation {
-    animation: pulse 0.5s ease;
+    animation: pulse 0.6s ease;
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
     .post-form-container {
+        max-width: 100%;
         padding: 1.5rem;
-        margin: 0 1rem;
+        margin: 2rem 1rem;
     }
 
     .form-title {
-        font-size: 1.5rem;
+        font-size: 1.6rem;
     }
 
     .file-upload-label {
@@ -385,28 +422,45 @@
     .submit-btn {
         width: 100%;
         align-self: center;
+        padding: 12px;
+    }
+
+    .file-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .file-size,
+    .file-tag {
+        margin-left: 0;
     }
 }
 
 @media (max-width: 480px) {
     .post-form-container {
         padding: 1rem;
+        margin: 1rem 0.5rem;
     }
 
     .form-title {
-        font-size: 1.3rem;
+        font-size: 1.4rem;
     }
 
     .file-upload-label {
         padding: 1rem;
+    }
+
+    .form-textarea {
+        min-height: 100px;
     }
 }
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
     .post-form-container {
-        background: #1a1a1a;
-        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+        background: #1e1e1e; /* Darker background */
+        box-shadow: 0 3px 15px rgba(0, 0, 0, 0.3);
     }
 
     .form-title {
@@ -417,27 +471,32 @@
         color: #bdc3c7;
     }
 
-    .form-textarea, .file-upload-label {
-        background-color: #2c3e50;
-        border-color: #34495e;
+    .form-textarea,
+    .file-upload-label,
+    .file-preview-container {
+        background-color: #2c2c2c;
+        border-color: #444;
         color: #ecf0f1;
     }
 
-    .form-textarea::placeholder {
-        color: #7f8c8d;
+    .form-textarea:focus {
+        background-color: #333;
+    }
+
+    .form-textarea::placeholder,
+    .character-count,
+    .upload-help-text,
+    .file-size {
+        color: #999;
     }
 
     .file-upload-label:hover {
-        background-color: #34495e;
-    }
-
-    .file-preview-container {
-        background-color: #2c3e50;
-        border-color: #34495e;
+        background-color: #383838;
     }
 
     .file-preview {
-        background: #34495e;
+        background: #333;
+        border-left-color: #3897f0;
     }
 
     .file-name {
@@ -452,106 +511,126 @@
 
     .alert-error {
         background: rgba(231, 76, 60, 0.2);
-        border-color: #e74c3c;
-        color: #e74c3c;
+        border-color: #e53935;
+        color: #e53935;
     }
 }
 
-/* Additional interactive features */
+/* Interactive enhancements */
 .form-group:focus-within .form-label {
-    color: #3498db;
+    color: #3897f0;
+    transform: scale(1.05); /* Subtle zoom on focus */
 }
 
 .loading-spinner {
     display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
     border-radius: 50%;
     border-top-color: #fff;
     animation: spin 0.8s linear infinite;
-    margin-right: 8px;
+    margin-right: 10px;
 }
 
 @keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+    to { transform: rotate(360deg); }
 }
 
 .submit-btn.submitting {
-    pointer-events: none;
     display: flex;
     align-items: center;
     justify-content: center;
+    pointer-events: none;
 }
 
-/* Image type preview */
+/* File preview images */
 .image-preview {
-    max-width: 100%;
+    max-width: 80px;
     height: 60px;
     object-fit: cover;
-    border-radius: 4px;
-    margin-top: 5px;
+    border-radius: 6px;
+    margin-left: 10px;
+    transition: transform 0.3s ease;
+}
+
+.image-preview:hover {
+    transform: scale(1.1);
 }
 
 /* File type indicators */
 .file-type-icon {
-    margin-right: 8px;
-    font-size: 1.2rem;
+    margin-right: 10px;
+    font-size: 1.5rem;
 }
 
-.file-type-image:before {
-    content: '🖼️';
-}
-
-.file-type-video:before {
-    content: '🎬';
-}
-
-.file-type-document:before {
-    content: '📄';
-}
-
-.file-type-other:before {
-    content: '📎';
-}
-
-/* Custom tooltip styles */
-.tooltip {
+/* Tooltip for file names */
+.file-name.tooltip {
     position: relative;
-    display: inline-block;
 }
 
-.tooltip .tooltip-text {
-    visibility: hidden;
-    width: 120px;
-    background-color: #555;
+.file-name.tooltip:hover:after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
     color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 5px;
-    position: absolute;
-    z-index: 1;
-    bottom: 125%;
-    left: 50%;
-    margin-left: -60px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    z-index: 10;
     opacity: 0;
-    transition: opacity 0.3s;
-}
-
-.tooltip .tooltip-text::after {
-    content: "";
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -5px;
-    border-width: 5px;
-    border-style: solid;
-    border-color: #555 transparent transparent transparent;
-}
-
-.tooltip:hover .tooltip-text {
-    visibility: visible;
+    transition: opacity 0.3s ease;
     opacity: 1;
+}
+
+.file-upload-container {
+    margin-top: 0.75rem;
+}
+
+.file-upload-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem;
+    border: 2px dashed #dbdbdb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    background-color: #fafafa;
+}
+
+.file-upload-label:hover {
+    border-color: #3897f0;
+    background-color: #f0f7fb;
+    transform: scale(1.01);
+}
+
+.file-upload-label.dragging {
+    background-color: #e3f2fd;
+    border-color: #2196f3;
+    transform: scale(1.02);
+    box-shadow: 0 0 10px rgba(33, 150, 243, 0.3); /* Glow effect during drag */
+}
+
+.upload-icon {
+    font-size: 2.5rem;
+    color: #3897f0;
+    margin-bottom: 0.75rem;
+    transition: transform 0.3s ease;
+}
+
+.file-upload-label.dragging .upload-icon {
+    transform: scale(1.4) rotate(20deg); /* More pronounced animation during drag */
+}
+
+.upload-help-text {
+    font-size: 0.85rem;
+    color: #8e8e8e;
+    margin-top: 0.5rem;
 }

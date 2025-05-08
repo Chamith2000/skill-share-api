@@ -102,6 +102,11 @@ const Navbar = () => {
                             Request Board
                         </Link>
                     </li>
+                    <li className="nav-item">
+                        <Link to="/learning-progress" className="nav-links">
+                            Learning Progress
+                        </Link>
+                    </li>
                     <li className="nav-item notification-item" ref={notificationRef}>
                         <button className="notification-button" onClick={toggleNotifications}>
                             <FaBell />
