@@ -1,9 +1,6 @@
-
-/* Navbar.css - Enhanced Styling */
-
 /* Main Navbar Styling */
 .navbar {
-  background: linear-gradient(to right, #2c3e50, #4a69bd);
+  background: linear-gradient(to right, #2c3e50, #4a69bd); /* Matches existing gradient */
   height: 80px;
   display: flex;
   justify-content: center;
@@ -12,7 +9,7 @@
   position: sticky;
   top: 0;
   z-index: 999;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.12); /* Matches PostList.css shadow */
 }
 
 .navbar-container {
@@ -20,7 +17,7 @@
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 1500px;
+  max-width: 1200px; /* Matches PostList.css for wider layout */
   padding: 0 30px;
 }
 
@@ -29,11 +26,10 @@
   color: #ffffff;
   display: flex;
   align-items: center;
-  justify-content: start;
   text-decoration: none;
   font-size: 1.8rem;
-  font-weight: bold;
-  letter-spacing: 1px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
   transition: all 0.3s ease;
 }
 
@@ -58,7 +54,6 @@
 }
 
 .nav-item {
-  position: relative;
   height: 80px;
   display: flex;
   align-items: center;
@@ -66,14 +61,18 @@
 
 .nav-links {
   color: #ffffff;
+  text-decoration: none;
+  padding: 0 1rem; /* Slightly reduced for more items */
+  height: 100%;
   display: flex;
   align-items: center;
-  text-decoration: none;
-  padding: 0 1.2rem;
-  height: 100%;
   font-weight: 500;
   position: relative;
   transition: all 0.3s ease;
+}
+
+.nav-links:hover {
+  color: #f9ca24; /* Matches existing hover color */
 }
 
 .nav-links::after {
@@ -84,11 +83,7 @@
   bottom: 0;
   left: 50%;
   background-color: #f9ca24;
-  transition: all 0.3s ease;
-}
-
-.nav-links:hover {
-  color: #f9ca24;
+  transition: width 0.3s ease, left 0.3s ease;
 }
 
 .nav-links:hover::after {
@@ -96,22 +91,34 @@
   left: 10%;
 }
 
+/* Active Link Styling */
+.nav-links.active {
+  color: #f9ca24;
+  font-weight: 600;
+}
+
+.nav-links.active::after {
+  width: 80%;
+  left: 10%;
+}
+
 /* Logout Button Styling */
 .logout-button {
-  padding: 10px 20px;
-  border-radius: 25px;
+  padding: 8px 18px;
+  border-radius: 20px; /* Matches Post.css button radius */
   background-color: transparent;
   color: #ffffff;
-  border: 2px solid #e74c3c;
+  border: 2px solid #e53935; /* Matches Post.css like button */
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s ease;
-  margin-left: 15px;
+  margin-left: 10px;
 }
 
 .logout-button:hover {
-  background-color: #e74c3c;
-  box-shadow: 0 0 8px rgba(231, 76, 60, 0.7);
+  background-color: #e53935;
+  box-shadow: 0 0 8px rgba(229, 57, 53, 0.7); /* Matches Post.css hover */
+  transform: translateY(-2px); /* Matches Post.css button hover */
 }
 
 /* Notification Styling */
@@ -127,8 +134,7 @@
   cursor: pointer;
   display: flex;
   align-items: center;
-  padding: 0 15px;
-  position: relative;
+  padding: 0 12px;
   transition: all 0.3s ease;
 }
 
@@ -139,17 +145,17 @@
 
 .notification-badge {
   position: absolute;
-  top: -8px;
-  right: 3px;
-  background-color: #e74c3c;
+  top: -6px;
+  right: 0;
+  background-color: #e53935; /* Matches Post.css like button */
   color: white;
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: bold;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 }
@@ -158,12 +164,12 @@
 .notification-dropdown {
   position: absolute;
   top: 80px;
-  right: -40px;
+  right: 0; /* Adjusted for better alignment */
   background-color: #ffffff;
-  width: 320px;
+  width: 300px; /* Slightly smaller for balance */
   max-height: 400px;
-  border-radius: 8px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  border-radius: 12px; /* Matches PostList.css */
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15); /* Matches PostList.css */
   overflow: hidden;
   z-index: 1000;
   animation: dropdown-animation 0.3s ease;
@@ -175,45 +181,46 @@
 }
 
 .notification-header {
-  padding: 15px 20px;
-  background-color: #4a69bd;
+  padding: 12px 20px;
+  background-color: #3897f0; /* Matches Post.css comment button */
   color: white;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
 }
 
 .notification-header h3 {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 600;
 }
 
 .notification-list {
-  max-height: 350px;
+  max-height: 340px;
   overflow-y: auto;
+  background-color: #fafafa; /* Matches PostList.css comments section */
 }
 
 .notification-list::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 .notification-list::-webkit-scrollbar-track {
   background: #f1f1f1;
-  border-radius: 10px;
+  border-radius: 6px;
 }
 
 .notification-list::-webkit-scrollbar-thumb {
-  background: #bdc3c7;
-  border-radius: 10px;
+  background: #3897f0; /* Matches Post.css comment button */
+  border-radius: 6px;
 }
 
 .notification-list::-webkit-scrollbar-thumb:hover {
-  background: #95a5a6;
+  background: #1877f2;
 }
 
 .notification-item {
-  padding: 15px 20px;
-  border-bottom: 1px solid #f1f1f1;
+  padding: 12px 20px;
+  border-bottom: 1px solid #dbdbdb; /* Matches PostList.css borders */
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -224,17 +231,18 @@
 }
 
 .notification-content p {
-  margin: 0 0 5px 0;
+  margin: 0 0 4px 0;
   color: #2c3e50;
+  font-size: 0.95rem;
 }
 
 .notification-time {
-  font-size: 0.75rem;
-  color: #7f8c8d;
+  font-size: 0.8rem;
+  color: #8e8e8e; /* Matches PostList.css secondary text */
 }
 
 .notification-item.unread {
-  background-color: #ecf0f1;
+  background-color: #f0f7fb; /* Matches Post.css comment button hover */
   position: relative;
 }
 
@@ -245,118 +253,153 @@
   top: 0;
   height: 100%;
   width: 4px;
-  background-color: #3498db;
+  background-color: #3897f0; /* Matches Post.css comment button */
 }
 
 .notification-item:hover {
-  background-color: #f5f7fa;
+  background-color: #e3f2fd; /* Matches PostForm.css dragging */
 }
 
 .no-notifications {
-  padding: 30px 0;
+  padding: 20px;
   text-align: center;
-  color: #7f8c8d;
+  color: #8e8e8e;
+  font-size: 0.9rem;
   font-style: italic;
 }
 
 /* Responsive Styles */
 @media screen and (max-width: 960px) {
   .navbar-container {
-    padding: 0 15px;
+    padding: 0 20px;
   }
-  
-  .navbar-logo {
-    font-size: 1.5rem;
+
+  .nav-menu {
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
-  
-  .navbar-logo img {
-    height: 35px;
+
+  .nav-item {
+    height: auto;
+    margin: 5px 0;
   }
-  
+
   .nav-links {
     padding: 0 0.8rem;
+    font-size: 0.95rem;
   }
-  
+
   .logout-button {
-    padding: 8px 15px;
-    margin-left: 5px;
+    padding: 7px 14px;
+    margin-left: 8px;
+    font-size: 0.9rem;
+  }
+
+  .notification-button {
+    padding: 0 10px;
+  }
+
+  .notification-dropdown {
+    width: 280px;
+    right: -10px;
   }
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 600px) {
   .navbar {
     height: auto;
-    padding: 15px 0;
+    padding: 10px 0;
   }
-  
+
   .navbar-container {
     flex-direction: column;
+    align-items: flex-start;
+    padding: 0 15px;
   }
-  
+
+  .navbar-logo {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+  }
+
+  .navbar-logo img {
+    height: 32px;
+  }
+
   .nav-menu {
     width: 100%;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 15px;
+    flex-direction: column;
+    align-items: stretch;
   }
-  
+
   .nav-item {
-    height: 60px;
+    height: auto;
+    width: 100%;
+    text-align: center;
   }
-  
+
+  .nav-links {
+    display: block;
+    padding: 12px 0;
+    font-size: 1rem;
+  }
+
+  .logout-button {
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .notification-button {
+    padding: 10px 0;
+    width: 100%;
+    justify-content: center;
+  }
+
   .notification-dropdown {
-    right: -100px;
+    width: 100%;
+    right: 0;
+    top: 100%;
+    border-radius: 8px;
   }
 }
 
-  .notification-header {
-    text-align: center;
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .navbar {
+    background: linear-gradient(to right, #1e1e1e, #2c3e50);
   }
-  
-  .notification-list {
-    max-height: 300px;
-  }
-  
-  .notification-item {
-    padding: 10px 15px;
-  }
-  
-  .notification-header h3 {
-    font-size: 1.1rem;
-  }
-  
-  .notification-content p {
-    font-size: 0.9rem;
-  }
-  
-  .notification-time {
-    font-size: 0.65rem;
-  }
-  .no-notifications {
-    font-size: 0.9rem;
-}
-/* Responsive Navbar */
-@media screen and (max-width: 600px) {
-  .navbar-container {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .nav-menu {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .nav-item {
-    margin-bottom: 10px;
-  }
-  
-  .logout-button {
-    width: 100%;
-    text-align: center;
-  }
-}
+
   .notification-dropdown {
-    right: -50px;
+    background: #2c2c2c;
   }
- 
+
+  .notification-header {
+    background: #1877f2;
+  }
+
+  .notification-list {
+    background: #333;
+  }
+
+  .notification-content p {
+    color: #ecf0f1;
+  }
+
+  .notification-time {
+    color: #999;
+  }
+
+  .notification-item.unread {
+    background: #383838;
+  }
+
+  .notification-item:hover {
+    background: #444;
+  }
+
+  .no-notifications {
+    color: #999;
+  }
+}

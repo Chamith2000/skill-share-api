@@ -1,6 +1,7 @@
 package com.paf.skillShareApi.controller;
 
 import com.paf.skillShareApi.controller.request.CreateRequestBoardRequestDTO;
+import com.paf.skillShareApi.controller.response.BidDTO;
 import com.paf.skillShareApi.model.Bid;
 import com.paf.skillShareApi.model.RequestBoard;
 import com.paf.skillShareApi.service.CreativeBarterService;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/creative-barter")
@@ -32,11 +34,20 @@ public class CreativeBarterController {
     }
 
     @PostMapping("/requests/{requestId}/bids")
-    public ResponseEntity<Bid> submitBid(@PathVariable Long requestId,
-                                         @RequestParam Long userId,
-                                         @RequestParam String solution) {
+    public ResponseEntity<BidDTO> submitBid(@PathVariable Long requestId,
+                                            @RequestParam Long userId,
+                                            @RequestParam String solution) {
         Bid bid = creativeBarterService.submitBid(requestId, userId, solution);
-        return ResponseEntity.ok(bid);
+        return ResponseEntity.ok(BidDTO.fromBid(bid));
+    }
+
+    @GetMapping("/requests/{requestId}/bids")
+    public ResponseEntity<List<BidDTO>> getBidsForRequest(@PathVariable Long requestId) {
+        List<Bid> bids = creativeBarterService.getBidsForRequest(requestId);
+        List<BidDTO> bidDTOs = bids.stream()
+                .map(BidDTO::fromBid)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(bidDTOs);
     }
 
     @PostMapping("/bids/{bidId}/accept")

@@ -11,4 +11,5 @@ public interface CreativeBarterService {
     List<RequestBoard> getAllRequests();
     Bid submitBid(Long requestId, Long userId, String solution);
     void acceptBid(Long bidId, Long requestOwnerId);
+    List<Bid> getBidsForRequest(Long requestId);
 }
