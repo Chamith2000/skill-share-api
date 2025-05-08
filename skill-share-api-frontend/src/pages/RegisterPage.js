@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import api from '../api/axios';
-import './RegisterPage.css'; // Import CSS file
+import './RegisterPage.css';
+import { FcGoogle } from 'react-icons/fc';
+import { BsFacebook, BsGithub, BsApple } from 'react-icons/bs';
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState({
@@ -12,7 +14,18 @@ const RegisterPage = () => {
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [serverError, setServerError] = useState('');
+    const [oauthLoading, setOauthLoading] = useState('');
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // Check if there's an OAuth error in URL params
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const oauthError = params.get('oauth_error');
+        if (oauthError) {
+            setServerError(decodeURIComponent(oauthError));
+        }
+    }, [location]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -99,11 +112,18 @@ const RegisterPage = () => {
         }
     };
 
+    const handleOAuthLogin = (provider) => {
+        setOauthLoading(provider);
+        // Redirect to the OAuth provider's authorization URL
+        window.location.href = `/api/oauth/${provider}`;
+    };
+
     return (
         <div className="register-container">
             <div className="register-card">
                 <div className="header">
-                    <h1>SkillShare</h1>
+                <img src="app_logo.svg" alt="ArtHive Logo" className="app-logo" />
+                    <h1>ArtHive</h1>
                     <p>Create your account</p>
                 </div>
 
@@ -112,6 +132,23 @@ const RegisterPage = () => {
                         {serverError}
                     </div>
                 )}
+
+                <div className="oauth-options">
+                    <button 
+                        className="oauth-button google"
+                        onClick={() => handleOAuthLogin('google')}
+                        disabled={!!oauthLoading}
+                    >
+                        <FcGoogle className="oauth-icon" />
+                        <span>{oauthLoading === 'google' ? 'Connecting...' : 'Continue with Google'}</span>
+                    </button>
+                    
+                
+                </div>
+
+                <div className="separator">
+                    <span>OR</span>
+                </div>
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">

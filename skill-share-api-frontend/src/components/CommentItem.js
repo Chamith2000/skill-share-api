@@ -98,7 +98,36 @@ const CommentItem = ({ comment, postId, currentUserId, refreshComments }) => {
                 </>
             )}
         </div>
-    );
+      ) : (
+        <>
+          <div className="text-gray-700 whitespace-pre-wrap break-words mt-1 mb-2">
+            {comment.text}
+          </div>
+          
+          {isCommentOwner && (
+            <div className="flex justify-end gap-2 mt-1">
+              <button
+                onClick={() => setIsEditing(true)}
+                disabled={isLoading}
+                className="p-1 rounded-md text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                aria-label="Edit comment"
+              >
+                <Edit2 size={16} />
+              </button>
+              <button
+                onClick={confirmDelete}
+                disabled={isLoading}
+                className="p-1 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                aria-label="Delete comment"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
 };
 
 export default CommentItem;

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { MessageSquare, Send, Clock, AlertCircle } from 'lucide-react';
 import { getCommentsByPostId, createComment } from '../services/api';
 import CommentItem from './CommentItem';
 import './CommentList.css';
@@ -54,6 +55,32 @@ const CommentList = ({ postId }) => {
             setLoading(false);
         }
     };
+    
+    // Optimistically update UI
+    setComments([...comments, tempComment]);
+    setNewComment('');
+    
+    createComment(postId, { text: newComment })
+      .then((response) => {
+        // Replace temp comment with real one or refresh the list
+        fetchComments();
+        setIsSubmitting(false);
+      })
+      .catch((err) => {
+        console.error('Error adding comment:', err);
+        // Remove the temp comment if failed
+        setComments(comments.filter(c => c.id !== tempComment.id));
+        setError('Failed to post comment. Please try again.');
+        setIsSubmitting(false);
+      });
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleAddComment();
+    }
+  };
 
     return (
         <div className="comment-list">
@@ -98,7 +125,15 @@ const CommentList = ({ postId }) => {
                 </button>
             </div>
         </div>
-    );
+        {error && (
+          <p className="mt-2 text-sm text-red-500">{error}</p>
+        )}
+        <p className="mt-2 text-xs text-gray-500">
+          Press Enter to submit. Use Shift+Enter for a new line.
+        </p>
+      </div>
+    </div>
+  );
 };
 
 export default CommentList;

@@ -1,9 +1,43 @@
+
+/* Enhanced PostList.css - Modern Social Media Design */
+
+/* Base styling */
+:root {
+  --primary-color: #4267B2;  /* Facebook-like blue */
+  --secondary-color: #E1306C; /* Instagram-like gradient start */
+  --tertiary-color: #8A3AB9;  /* Instagram-like gradient middle */
+  --accent-color: #405DE6;    /* Instagram-like gradient end */
+  --text-color: #262626;
+  --text-secondary: #8e8e8e;
+  --border-color: #dbdbdb;
+  --light-bg: #fafafa;
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  --hover-bg: #f8f8f8;
+  --like-color: #ed4956;
+  --comment-color: #0095f6;
+  --share-color: #4CAF50;
+  --button-hover: #f2f2f2;
+  --success-color: #4CAF50;
+  --danger-color: #FF5252;
+  --warning-color: #FFC107;
+  --border-radius: 12px;
+}
+
+body {
+  background-color: var(--light-bg);
+  font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+/* Container styling */
 .post-list-container {
     max-width: 1200px; /* Increased from 900px to allow wider post cards */
     margin: 0 auto;
     padding: 20px;
 }
 
+/* Header styling */
 .post-list-header {
     font-size: 32px; /* Increased for prominence */
     font-weight: bold;
@@ -12,6 +46,7 @@
     color: #333;
 }
 
+/* Post card styling */
 .posts-list {
     display: flex;
     flex-direction: column;
@@ -56,12 +91,25 @@
 }
 
 .avatar-placeholder {
-    display: block;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-    border-radius: 50%;
-    border: 2px solid #fff;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.username-with-follow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 2px;
 }
 
 .user-details {
@@ -133,7 +181,15 @@
     cursor: pointer;
 }
 
-/* Post description */
+.delete-button {
+  color: var(--danger-color);
+}
+
+.delete-button:hover {
+  background-color: rgba(255, 82, 82, 0.1) !important;
+}
+
+/* Post content styling */
 .post-description {
     padding: 20px; /* Increased padding */
     font-size: 16px;
@@ -159,9 +215,16 @@
     padding: 0;
 }
 
-/* 1 image: full width */
-.media-count-1 {
-    grid-template-columns: 1fr;
+.post-edit-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 15px;
+  margin-bottom: 10px;
+  min-height: 80px;
 }
 
 .media-count-1 .media-item {
@@ -169,19 +232,19 @@
     aspect-ratio: 16 / 9; /* Standard widescreen ratio */
 }
 
-/* 2 images: side by side */
-.media-count-2 {
-    grid-template-columns: repeat(2, 1fr);
+.post-edit-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
 }
 
 .media-count-2 .media-item {
     aspect-ratio: 4 / 3; /* Slightly wider images */
 }
 
-/* 3 images: 1 large on left, 2 smaller on right */
-.media-count-3 {
-    grid-template-columns: 2fr 1fr;
-    grid-template-rows: repeat(2, 1fr);
+.edit-save-btn {
+  background-color: var(--primary-color);
+  color: white;
 }
 
 .media-count-3 .media-item:nth-child(1) {
@@ -189,15 +252,38 @@
     aspect-ratio: 4 / 3;
 }
 
-.media-count-3 .media-item:nth-child(2),
-.media-count-3 .media-item:nth-child(3) {
-    aspect-ratio: 1 / 1;
+.edit-cancel-btn {
+  background-color: #f1f1f1;
+  color: var(--text-color);
 }
 
-/* 4 images: 2x2 grid */
-.media-count-4 {
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
+.edit-cancel-btn:hover {
+  background-color: #e1e1e1;
+}
+
+/* Media gallery styling */
+.media-gallery {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  background-color: #000;
+}
+
+.media-count-1 {
+  grid-template-columns: 1fr;
+}
+
+.media-count-1 .media-item {
+  aspect-ratio: 16 / 9;
+}
+
+.media-count-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.media-count-3 {
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: repeat(2, 1fr);
 }
 
 .media-count-4 .media-item {
@@ -234,13 +320,13 @@
     font-weight: bold;
 }
 
-.media-gallery.media-count-6 .media-item:nth-child(5)::after {
-    content: '+2';
+.media-item {
+  position: relative;
+  overflow: hidden;
 }
 
-.media-item {
-    position: relative;
-    overflow: hidden;
+.media-item:hover .media-image {
+  transform: scale(1.03);
 }
 
 .media-image {
@@ -503,8 +589,9 @@
     overflow: hidden;
 }
 
-.dropdown:hover .dropdown-content {
-    display: block;
+.comment-delete-btn:hover {
+  color: var(--danger-color);
+  background-color: rgba(255, 82, 82, 0.1);
 }
 
 .dropdown-content button {
@@ -525,12 +612,21 @@
     background-color: #f5f5f5;
 }
 
-.edit-button {
-    color: #4a90e2;
+/* Comment edit form styling */
+.comment-edit-form {
+  margin-bottom: 10px;
 }
 
-.delete-button {
-    color: #e25c4a;
+.comment-edit-textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  resize: vertical;
+  font-family: inherit;
+  font-size: 14px;
+  margin-bottom: 8px;
+  min-height: 60px;
 }
 
 /* Post edit form */
