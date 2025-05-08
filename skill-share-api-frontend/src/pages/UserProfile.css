@@ -1,0 +1,500 @@
+/* Profile Container */
+.profile-container {
+    max-width: 1200px; /* Matches Navbar.css */
+    margin: 5rem auto;
+    padding: 2.5rem;
+    background: #ffffff;
+    border-radius: 12px; /* Matches Navbar.css notification-dropdown */
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.12); /* Matches Navbar.css */
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Matches Navbar.css hover */
+}
+
+.profile-container:hover {
+    transform: translateY(-3px); /* Matches Navbar.css logo hover */
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Profile Header */
+.profile-header {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 3rem;
+    align-items: center;
+}
+
+/* Profile Image */
+.profile-image-container {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #fafafa; /* Matches Navbar.css notification-list */
+    transition: transform 0.3s ease; /* Matches Navbar.css logo */
+}
+
+.profile-image-container:hover {
+    transform: scale(1.05); /* Matches Navbar.css notification-button */
+}
+
+.profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.profile-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    font-weight: bold;
+    color: #8e8e8e; /* Matches Navbar.css notification-time */
+    background-color: #dbdbdb; /* Matches Navbar.css borders */
+}
+
+/* Image Upload */
+.image-upload-section {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    transition: opacity 0.3s ease; /* Matches Navbar.css transitions */
+}
+
+.image-upload-section:hover {
+    opacity: 0.9;
+}
+
+.file-input {
+    display: none;
+}
+
+.file-input-label {
+    background: #3897f0; /* Matches Navbar.css notification-header */
+    color: white;
+    padding: 8px 12px;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 8px; /* Matches Navbar.css notification-dropdown */
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease; /* Matches Navbar.css */
+}
+
+.file-input-label:hover {
+    background: #1877f2; /* Matches Navbar.css notification-header hover */
+    transform: translateY(-2px); /* Matches Navbar.css logout-button */
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Profile Info */
+.profile-info {
+    flex: 1;
+}
+
+.profile-info h1 {
+    margin: 0 0 1rem;
+    font-size: 2rem;
+    color: #2c3e50; /* Matches Navbar.css notification-content */
+    font-weight: 600;
+}
+
+.profile-details {
+    display: flex;
+    gap: 2rem;
+    font-size: 1.1rem;
+    color: #34495e; /* Matches Navbar.css notification-content */
+}
+
+.craft-tokens {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #f9f9f9; /* Matches Navbar.css notification-list */
+    padding: 0.5rem 1rem;
+    border-radius: 6px; /* Matches Navbar.css */
+}
+
+.token-icon {
+    font-style: normal;
+    font-size: 1.2rem;
+}
+
+.skill-level {
+    background: #f9f9f9;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+}
+
+/* Profile Body */
+.profile-body {
+    background-color: #fafafa; /* Matches Navbar.css notification-list */
+    border-radius: 12px;
+    padding: 2rem;
+}
+
+/* Edit Form */
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: 500;
+    color: #2c3e50; /* Matches Navbar.css notification-content */
+    transition: color 0.3s ease; /* Matches Navbar.css transitions */
+}
+
+.form-group label:hover {
+    color: #3897f0; /* Changed from #f9ca24 to match Navbar.css notification-header */
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    padding: 12px;
+    border: 1px solid #dbdbdb; /* Matches Navbar.css notification-item */
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: #fff;
+    transition: all 0.3s ease; /* Matches Navbar.css */
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #3897f0; /* Matches Navbar.css notification-header */
+    box-shadow: 0 0 0 3px rgba(56, 151, 240, 0.2);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #8e8e8e; /* Matches Navbar.css notification-time */
+}
+
+/* Buttons */
+.button-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.save-btn,
+.edit-btn,
+.cancel-btn,
+.retry-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 20px; /* Matches Navbar.css logout-button */
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease; /* Matches Navbar.css */
+}
+
+.save-btn {
+    background: #3897f0; /* Matches Navbar.css notification-header */
+    color: white;
+}
+
+.save-btn:hover:not(:disabled) {
+    background: #1877f2;
+    transform: translateY(-2px); /* Matches Navbar.css logout-button */
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.save-btn:disabled {
+    background: #bdc3c7; /* Matches Navbar.css scrollbar-track */
+    cursor: not-allowed;
+}
+
+.edit-btn {
+    background: #3897f0; /* Changed from #f9ca24 to match Navbar.css notification-header */
+    color: white; /* Changed to white for better contrast */
+}
+
+.edit-btn:hover {
+    background: #1877f2; /* Changed from #e4b822 to match Navbar.css */
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.cancel-btn {
+    background: #e53935; /* Matches Navbar.css logout-button border */
+    color: white;
+}
+
+.cancel-btn:hover:not(:disabled) {
+    background: #c62828;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.retry-btn {
+    background: #3897f0;
+    color: white;
+}
+
+.retry-btn:hover {
+    background: #1877f2;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Alerts */
+.alert {
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    animation: dropdown-animation 0.3s ease; /* Matches Navbar.css */
+}
+
+@keyframes dropdown-animation {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.alert-success {
+    background: #d4edda; /* Matches PostForm.css success */
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-success::before {
+    content: '✅';
+    margin-right: 0.75rem;
+    font-size: 1.2rem;
+}
+
+.alert-error {
+    background: #f8d7da; /* Matches PostForm.css error */
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.alert-error::before {
+    content: '❌';
+    margin-right: 0.75rem;
+    font-size: 1.2rem;
+}
+
+/* Loading */
+.loading {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+    color: #2c3e50; /* Matches Navbar.css notification-content */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid #3897f0; /* Matches Navbar.css notification-header */
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Error Container */
+.error-container {
+    text-align: center;
+    padding: 2rem;
+}
+
+/* Profile Content */
+.profile-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.bio-section,
+.contact-info {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease; /* Matches Navbar.css */
+}
+
+.bio-section:hover,
+.contact-info:hover {
+    transform: translateY(-3px); /* Matches Navbar.css logo */
+}
+
+.bio-section h3,
+.contact-info h3 {
+    margin: 0 0 1rem;
+    color: #2c3e50; /* Matches Navbar.css notification-content */
+    font-size: 1.3rem;
+}
+
+.bio-section p,
+.contact-info p {
+    margin: 0;
+    color: #34495e; /* Matches Navbar.css notification-content */
+    font-size: 1rem;
+}
+
+/* Responsive Design */
+@media screen and (max-width: 960px) {
+    .profile-container {
+        max-width: 100%;
+        margin: 2rem 1rem;
+        padding: 1.5rem;
+    }
+
+    .profile-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+
+    .profile-image-container {
+        width: 120px;
+        height: 120px;
+    }
+
+    .profile-info h1 {
+        font-size: 1.6rem;
+    }
+
+    .profile-details {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .button-group {
+        flex-direction: column;
+    }
+
+    .save-btn,
+    .edit-btn,
+    .cancel-btn,
+    .retry-btn {
+        width: 100%;
+        padding: 12px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .profile-container {
+        margin: 1rem 0.5rem;
+        padding: 1rem;
+    }
+
+    .profile-image-container {
+        width: 100px;
+        height: 100px;
+    }
+
+    .profile-info h1 {
+        font-size: 1.4rem;
+    }
+
+    .bio-section,
+    .contact-info {
+        padding: 1rem;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .profile-container {
+        background: #2c2c2c; /* Matches Navbar.css notification-dropdown */
+        box-shadow: 0 3px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .profile-image-container {
+        background: #333; /* Matches Navbar.css notification-list */
+    }
+
+    .profile-image-placeholder {
+        background: #444;
+        color: #999; /* Matches Navbar.css no-notifications */
+    }
+
+    .profile-body {
+        background: #333;
+    }
+
+    .profile-info h1,
+    .bio-section h3,
+    .contact-info h3,
+    .form-group label {
+        color: #ecf0f1; /* Matches Navbar.css notification-content */
+    }
+
+    .profile-details,
+    .bio-section p,
+    .contact-info p {
+        color: #bdc3c7; /* Matches Navbar.css notification-time */
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        background: #444;
+        border-color: #555;
+        color: #ecf0f1;
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+        color: #999;
+    }
+
+    .bio-section,
+    .contact-info {
+        background: #444;
+    }
+
+    .alert-success {
+        background: rgba(46, 204, 113, 0.2);
+        border-color: #2ecc71;
+        color: #2ecc71;
+    }
+
+    .alert-error {
+        background: rgba(231, 76, 60, 0.2);
+        border-color: #e53935; /* Matches Navbar.css logout-button */
+        color: #e53935;
+    }
+
+    .loading {
+        color: #ecf0f1;
+    }
+}

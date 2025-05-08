@@ -1,40 +1,102 @@
 import React, { useEffect, useState } from 'react';
 import { getCommentsByPostId, createComment } from '../services/api';
+import CommentItem from './CommentItem';
+import './CommentList.css';
 
 const CommentList = ({ postId }) => {
     const [comments, setComments] = useState([]);
     const [newComment, setNewComment] = useState('');
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    const userObj = JSON.parse(localStorage.getItem('user') || 'null');
+    const currentUserId = userObj ? userObj.id : null;
 
     useEffect(() => {
-        getCommentsByPostId(postId)
-            .then((response) => setComments(response.data.comments))
-            .catch((error) => console.error('Error fetching comments:', error));
+        fetchComments();
     }, [postId]);
 
-    const handleAddComment = () => {
-        if (!newComment.trim()) return;
+    const fetchComments = async () => {
+        try {
+            setLoading(true);
+            const response = await getCommentsByPostId(postId);
+            setComments(response.data.comments || []);
+            setLoading(false);
+        } catch (error) {
+            setError('Error fetching comments');
+            setLoading(false);
+            console.error('Error fetching comments:', error);
+        }
+    };
 
-        createComment(postId, { text: newComment })
-            .then(() => {
-                setComments([...comments, { text: newComment }]);
-                setNewComment('');
-            })
-            .catch((err) => console.error('Error adding comment:', err));
+    const handleAddComment = async () => {
+        if (!currentUserId) {
+            setError('Please log in to add a comment');
+            return;
+        }
+        if (!newComment.trim()) {
+            setError('Comment cannot be empty');
+            return;
+        }
+        try {
+            setError(null);
+            setLoading(true);
+            const response = await createComment(postId, { text: newComment, uid: currentUserId });
+            setNewComment('');
+            setSuccess('Comment added successfully!');
+            setComments((prevComments) => [...prevComments, response.data.comment]);
+            setTimeout(() => setSuccess(null), 3000);
+        } catch (err) {
+            setError('Error adding comment');
+            console.error('Error adding comment:', err);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <div className="comment-list">
             <h4>Comments</h4>
-            {comments.map((comment, index) => (
-                <p key={index}>{comment.text}</p>
-            ))}
-            <input
-                type="text"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Write a comment..."
-            />
-            <button onClick={handleAddComment}>Add Comment</button>
+            {error && <div className="alert alert-error">{error}</div>}
+            {success && <div className="alert alert-success">{success}</div>}
+            {loading && (
+                <div className="loading">
+                    <span className="loading-spinner"></span> Loading...
+                </div>
+            )}
+            {comments.length > 0 ? (
+                comments.map((comment) => (
+                    <CommentItem
+                        key={comment.id}
+                        comment={comment}
+                        postId={postId}
+                        currentUserId={currentUserId}
+                        refreshComments={fetchComments}
+                    />
+                ))
+            ) : (
+                !loading && <p className="no-comments">No comments yet.</p>
+            )}
+            <div className="comment-form">
+                <textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder={currentUserId ? 'Write a comment...' : 'Log in to comment'}
+                    className="comment-input"
+                    rows="3"
+                    aria-label="Write a comment"
+                    disabled={!currentUserId}
+                />
+                <button
+                    onClick={handleAddComment}
+                    className="add-comment-btn"
+                    disabled={loading || !currentUserId}
+                    aria-label="Add comment"
+                >
+                    Add Comment
+                </button>
+            </div>
         </div>
     );
 };

@@ -11,6 +11,7 @@ import com.paf.skillShareApi.repository.UserRepository;
 import com.paf.skillShareApi.service.CreativeBarterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,7 +38,7 @@ public class CreativeBarterServiceImpl implements CreativeBarterService {
         requestBoard.setDescription(request.getDescription());
         requestBoard.setUser(user);
         requestBoard.setCreatedAt(LocalDateTime.now());
-        requestBoard.setIsResolved(false); // This should now work
+        requestBoard.setIsResolved(false);
 
         return requestBoardRepository.save(requestBoard);
     }
@@ -45,6 +46,22 @@ public class CreativeBarterServiceImpl implements CreativeBarterService {
     @Override
     public List<RequestBoard> getAllRequests() {
         return requestBoardRepository.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Bid> getBidsForRequest(Long requestId) {
+        // This implementation ensures user information is loaded
+        List<Bid> bids = bidRepository.findByRequestBoardId(requestId);
+
+        // Force initialization of user data for each bid to ensure it's available in the response
+        bids.forEach(bid -> {
+            if (bid.getUser() != null) {
+                bid.getUser().getUsername(); // Access username to force initialization
+            }
+        });
+
+        return bids;
     }
 
     @Override
@@ -59,12 +76,13 @@ public class CreativeBarterServiceImpl implements CreativeBarterService {
         bid.setUser(user);
         bid.setSolution(solution);
         bid.setCreatedAt(LocalDateTime.now());
-        bid.setIsAccepted(false); // This should now work
+        bid.setIsAccepted(false);
 
         return bidRepository.save(bid);
     }
 
     @Override
+    @Transactional
     public void acceptBid(Long bidId, Long requestOwnerId) {
         Bid bid = bidRepository.findById(bidId)
                 .orElseThrow(() -> new RuntimeException("Bid not found with ID: " + bidId));
@@ -74,8 +92,8 @@ public class CreativeBarterServiceImpl implements CreativeBarterService {
             throw new RuntimeException("Only the request owner can accept a bid");
         }
 
-        bid.setIsAccepted(true); // This should now work
-        requestBoard.setIsResolved(true); // This should now work
+        bid.setIsAccepted(true);
+        requestBoard.setIsResolved(true);
 
         // Award Craft Token to the bidder
         User bidder = bid.getUser();

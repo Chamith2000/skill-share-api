@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/skill-share-api.iml" filepath="$PROJECT_DIR$/.idea/skill-share-api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/skill-share-api-backend/skill-share-api.iml" filepath="$PROJECT_DIR$/skill-share-api-backend/skill-share-api.iml" />
     </modules>
   </component>
 </project>
