@@ -3,17 +3,12 @@ package com.paf.skillShareApi.service.impl;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.paf.skillShareApi.controller.request.CreatePostRequestDTO;
-import com.paf.skillShareApi.exception.InvalidMediaException;
-import com.paf.skillShareApi.exception.InvalidPostContentException;
-import com.paf.skillShareApi.exception.PostNotFoundException;
-import com.paf.skillShareApi.exception.UserNotFoundException;
+import com.paf.skillShareApi.exception.*;
 import com.paf.skillShareApi.model.*;
 import com.paf.skillShareApi.repository.MediaRepository;
 import com.paf.skillShareApi.repository.PostRepository;
 import com.paf.skillShareApi.repository.UserRepository;
 import com.paf.skillShareApi.service.PostService;
-import org.apache.commons.codec.EncoderException;
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -31,8 +26,10 @@ import java.util.stream.Collectors;
 @Service
 public class PostServiceImpl implements PostService {
 
-    // Add the missing constant declaration
-    private static final int MAX_VIDEO_DURATION_SECONDS = 30; // 1 minute max duration
+    // Existing constant for max video duration
+    private static final int MAX_VIDEO_DURATION_SECONDS = 30; // 30 seconds max duration
+    // New constant for max file size (10MB in bytes)
+    private static final long MAX_VIDEO_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 
     @Autowired
     private PostRepository postRepository;
@@ -68,14 +65,13 @@ public class PostServiceImpl implements PostService {
                     String contentType = file.getContentType();
                     boolean isVideo = contentType != null && contentType.startsWith("video");
 
-                    // Validate video duration
+                    // Validate video duration and size
                     if (isVideo) {
-                        validateVideoDuration(file);
+                        validateVideo(file); // Updated method to validate both duration and size
                     }
 
                     Map uploadOptions = new HashMap();
                     if (isVideo) {
-                        // Set specific options for video uploads if needed
                         uploadOptions.put("resource_type", "video");
                     }
 
@@ -109,20 +105,27 @@ public class PostServiceImpl implements PostService {
         }
     }
 
-    private void validateVideoDuration(MultipartFile videoFile) throws InvalidMediaException {
+    // Updated validation method to check both duration and size
+    private void validateVideo(MultipartFile videoFile) throws InvalidMediaException {
         if (videoFile == null || !videoFile.getContentType().startsWith("video")) {
             return;
         }
 
+        // Validate file size
+        if (videoFile.getSize() > MAX_VIDEO_FILE_SIZE_BYTES) {
+            throw new InvalidMediaException("Video file size exceeds maximum allowed limit of " +
+                    MAX_VIDEO_FILE_SIZE_BYTES / (1024 * 1024) + "MB (Actual: " +
+                    videoFile.getSize() / (1024 * 1024) + "MB)");
+        }
+
+        // Validate video duration
         File tempFile = null;
         try {
-            // Create a temporary file
             tempFile = File.createTempFile("video-upload", ".tmp");
             FileOutputStream fos = new FileOutputStream(tempFile);
             fos.write(videoFile.getBytes());
             fos.close();
 
-            // Get video duration using jave library
             MultimediaObject multimediaObject = new MultimediaObject(tempFile);
             MultimediaInfo info = multimediaObject.getInfo();
             long durationInSeconds = info.getDuration() / 1000;
@@ -135,13 +138,11 @@ public class PostServiceImpl implements PostService {
         } catch (IOException | ws.schild.jave.EncoderException e) {
             throw new InvalidMediaException("Failed to validate video file: " + e.getMessage());
         } finally {
-            // Clean up the temporary file
             if (tempFile != null && tempFile.exists()) {
                 tempFile.delete();
             }
         }
     }
-
     @Override
     public ResponseEntity<Map> getPost(Long postId) {
         try {
@@ -294,7 +295,15 @@ public class PostServiceImpl implements PostService {
                 post.getMediaFiles().clear();
 
                 for (int i = 0; i < Math.min(postRequest.getFiles().size(), 3); i++) {
-                    var file = postRequest.getFiles().get(i);
+                    MultipartFile file = postRequest.getFiles().get(i);
+                    String contentType = file.getContentType();
+                    boolean isVideo = contentType != null && contentType.startsWith("video");
+
+                    // Validate video duration and size
+                    if (isVideo) {
+                        validateVideo(file); // Updated method to validate both duration and size
+                    }
+
                     Map uploadResult = cloudinary.uploader().upload(
                             file.getBytes(),
                             ObjectUtils.emptyMap()
@@ -306,8 +315,7 @@ public class PostServiceImpl implements PostService {
                     Media media = new Media();
                     media.setUrl(uploadedUrl);
                     media.setCloudinaryPublicId(publicId);
-                    String contentType = file.getContentType();
-                    media.setMediaType(contentType != null && contentType.startsWith("video") ? "video" : "image");
+                    media.setMediaType(isVideo ? "video" : "image");
                     media.setUploadedAt(LocalDateTime.now());
                     media.setPost(post);
                     mediaRepository.save(media);

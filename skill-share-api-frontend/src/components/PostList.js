@@ -16,7 +16,6 @@ const PostList = () => {
     const [editPostText, setEditPostText] = useState('');
     const [likeStatus, setLikeStatus] = useState({});
     const [likeSubmitting, setLikeSubmitting] = useState({});
-    // Add follow status state for tracking follow relationships
     const [followStatus, setFollowStatus] = useState({});
     const [followSubmitting, setFollowSubmitting] = useState({});
 
@@ -84,17 +83,16 @@ const PostList = () => {
 
         if (posts.length > 0 && user && user.id) {
             fetchLikeStatus();
-            fetchFollowStatus(); // Add this to fetch follow status
+            fetchFollowStatus();
         }
     }, []);
 
-    // Function to fetch follow status for all post authors
     const fetchFollowStatus = async () => {
         if (!user || !user.id) return;
 
         const status = {};
         for (const post of posts) {
-            if (post.userId !== user.id) { // Don't check follow status for own posts
+            if (post.userId !== user.id) {
                 try {
                     const response = await checkFollowStatus(user.id, post.userId);
                     status[post.userId] = response.data.following;
@@ -107,14 +105,12 @@ const PostList = () => {
         setFollowStatus(status);
     };
 
-    // Function to handle follow/unfollow toggling
     const handleFollowToggle = async (postUserId) => {
         if (!user || !user.id) {
             alert('Please log in to follow users.');
             return;
         }
 
-        // Don't allow following self
         if (user.id === postUserId) {
             return;
         }
@@ -125,12 +121,10 @@ const PostList = () => {
             const isCurrentlyFollowing = followStatus[postUserId] || false;
 
             if (isCurrentlyFollowing) {
-                // Unfollow user
                 await unfollowUser(user.id, postUserId);
                 setFollowStatus((prev) => ({ ...prev, [postUserId]: false }));
                 console.log(`Unfollowed user ${postUserId}`);
             } else {
-                // Follow user
                 await followUser(user.id, postUserId);
                 setFollowStatus((prev) => ({ ...prev, [postUserId]: true }));
                 console.log(`Followed user ${postUserId}`);
@@ -152,14 +146,11 @@ const PostList = () => {
         setLikeSubmitting((prev) => ({ ...prev, [postId]: true }));
 
         try {
-            // Call API to toggle like
             const response = await toggleLike(postId, user.id);
             console.log(`Like toggled for post ${postId}:`, response.data);
 
-            // Update like status based on server response
             setLikeStatus((prev) => ({ ...prev, [postId]: response.data.liked }));
 
-            // Update posts with new like count
             setPosts((prev) => {
                 return prev.map(p => {
                     if (p.id === postId) {
@@ -236,14 +227,12 @@ const PostList = () => {
         }
     };
 
-    // Start editing a comment
     const handleEditComment = (comment) => {
         if (!user) {
             alert('Please log in to edit comments.');
             return;
         }
 
-        // Log comment details for debugging
         console.log('Editing comment:', comment);
         console.log('Current user:', user);
 
@@ -251,13 +240,11 @@ const PostList = () => {
         setEditCommentText(comment.text);
     };
 
-    // Cancel editing comment
     const handleCancelEdit = () => {
         setEditingComment(null);
         setEditCommentText('');
     };
 
-    // Save edited comment
     const handleSaveEdit = async (postId, commentId) => {
         if (!editCommentText.trim()) {
             alert('Comment cannot be empty.');
@@ -269,7 +256,6 @@ const PostList = () => {
                 text: editCommentText
             };
 
-            // Optimistic update
             setCommentsByPost((prev) => {
                 const updatedComments = (prev[postId] || []).map(c =>
                     c.id === commentId ? { ...c, text: editCommentText } : c
@@ -277,18 +263,15 @@ const PostList = () => {
                 return { ...prev, [postId]: updatedComments };
             });
 
-            // Call API to update comment
             await updateComment(postId, commentId, commentData);
             console.log(`Comment ${commentId} updated successfully`);
 
-            // Reset edit state
             setEditingComment(null);
             setEditCommentText('');
         } catch (err) {
             console.error('Error updating comment:', err);
             alert(`Failed to update comment: ${err.message}`);
 
-            // Refresh comments to get the original state
             const commentsResponse = await getCommentsByPostId(postId);
             setCommentsByPost((prev) => ({
                 ...prev,
@@ -297,37 +280,31 @@ const PostList = () => {
         }
     };
 
-    // Delete a comment
     const handleDeleteComment = async (postId, commentId) => {
         if (!user) {
             alert('Please log in to delete comments.');
             return;
         }
 
-        // Log comment details for debugging
         console.log('Deleting comment ID:', commentId);
         console.log('From post ID:', postId);
 
-        // Confirm deletion
         if (!window.confirm('Are you sure you want to delete this comment?')) {
             return;
         }
 
         try {
-            // Optimistic update - remove the comment from the UI
             setCommentsByPost((prev) => {
                 const filteredComments = (prev[postId] || []).filter(c => c.id !== commentId);
                 return { ...prev, [postId]: filteredComments };
             });
 
-            // Call API to delete the comment
             await deleteComment(postId, commentId);
             console.log(`Comment ${commentId} deleted successfully`);
         } catch (err) {
             console.error('Error deleting comment:', err);
             alert(`Failed to delete comment: ${err.message}`);
 
-            // Refresh comments to restore the original state
             const commentsResponse = await getCommentsByPostId(postId);
             setCommentsByPost((prev) => ({
                 ...prev,
@@ -336,14 +313,12 @@ const PostList = () => {
         }
     };
 
-    // Start editing a post
     const handleEditPost = (post) => {
         if (!user) {
             alert('Please log in to edit posts.');
             return;
         }
 
-        // Check if the current user is the owner of the post
         if (user.id !== post.userId) {
             alert('You can only edit your own posts.');
             return;
@@ -354,13 +329,11 @@ const PostList = () => {
         setEditPostText(post.description);
     };
 
-    // Cancel editing post
     const handleCancelPostEdit = () => {
         setEditingPost(null);
         setEditPostText('');
     };
 
-    // Save edited post
     const handleSavePostEdit = async (postId) => {
         if (!editPostText.trim()) {
             alert('Post description cannot be empty.');
@@ -372,25 +345,21 @@ const PostList = () => {
                 description: editPostText
             };
 
-            // Optimistic update
             setPosts((prev) => {
                 return prev.map(p =>
                     p.id === postId ? { ...p, description: editPostText } : p
                 );
             });
 
-            // Call API to update post
             await updatePost(postId, postData);
             console.log(`Post ${postId} updated successfully`);
 
-            // Reset edit state
             setEditingPost(null);
             setEditPostText('');
         } catch (err) {
             console.error('Error updating post:', err);
             alert(`Failed to update post: ${err.message}`);
 
-            // Refresh posts to get the original state
             try {
                 const postResponse = await getPostById(postId);
                 setPosts((prev) => {
@@ -404,43 +373,36 @@ const PostList = () => {
         }
     };
 
-    // Delete a post
     const handleDeletePost = async (postId) => {
         if (!user) {
             alert('Please log in to delete posts.');
             return;
         }
 
-        // Find the post to check ownership
         const postToDelete = posts.find(p => p.id === postId);
         if (!postToDelete) {
             alert('Post not found.');
             return;
         }
 
-        // Check if the current user is the owner of the post
         if (user.id !== postToDelete.userId) {
             alert('You can only delete your own posts.');
             return;
         }
 
-        // Confirm deletion
         if (!window.confirm('Are you sure you want to delete this post?')) {
             return;
         }
 
         try {
-            // Optimistic update - remove the post from the UI
             setPosts((prev) => prev.filter(p => p.id !== postId));
 
-            // Call API to delete the post
             await deletePost(postId);
             console.log(`Post ${postId} deleted successfully`);
         } catch (err) {
             console.error('Error deleting post:', err);
             alert(`Failed to delete post: ${err.message}`);
 
-            // Refresh all posts to restore the original state
             try {
                 const response = await getAllPosts();
                 const postIds = response.data.posts.map((post) => post.id);
@@ -461,12 +423,10 @@ const PostList = () => {
         }
     };
 
-    // Check if user can edit/delete a post
     const canEditPost = (post) => {
         return user && user.id === post.userId;
     };
 
-    // Check if it's the current user's post (to not show follow button on own posts)
     const isOwnPost = (post) => {
         return user && user.id === post.userId;
     };
@@ -570,15 +530,30 @@ const PostList = () => {
                                 <div className={`media-gallery media-count-${post.media.length}`}>
                                     {post.media.map((mediaItem, idx) => (
                                         <div key={idx} className="media-item">
-                                            <img
-                                                src={mediaItem.url}
-                                                alt={`Post media ${idx + 1}`}
-                                                className="media-image"
-                                                onError={(e) => {
-                                                    e.target.src = 'https://via.placeholder.com/300?text=Image+Not+Found';
-                                                    console.error(`Failed to load image for post ${post.id}: ${mediaItem.url}`);
-                                                }}
-                                            />
+                                            {mediaItem.mediaType === 'video' ? (
+                                                <video
+                                                    src={mediaItem.url}
+                                                    className="media-video"
+                                                    controls
+                                                    muted={false}
+                                                    playsInline
+                                                    preload="metadata"
+                                                    onError={(e) => {
+                                                        e.target.poster = 'https://via.placeholder.com/300?text=Video+Not+Found';
+                                                        console.error(`Failed to load video for post ${post.id}: ${mediaItem.url}`);
+                                                    }}
+                                                />
+                                            ) : (
+                                                <img
+                                                    src={mediaItem.url}
+                                                    alt={`Post media ${idx + 1}`}
+                                                    className="media-image"
+                                                    onError={(e) => {
+                                                        e.target.src = 'https://via.placeholder.com/300?text=Image+Not+Found';
+                                                        console.error(`Failed to load image for post ${post.id}: ${mediaItem.url}`);
+                                                    }}
+                                                />
+                                            )}
                                         </div>
                                     ))}
                                 </div>
