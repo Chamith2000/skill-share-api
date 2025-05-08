@@ -1,4 +1,4 @@
-/* PostForm.css */
+
 .post-form-container {
     max-width: 600px;
     margin: 0 auto;
@@ -200,7 +200,7 @@
     border: 1px solid #f5c6cb;
 }
 
-/* Responsive design */
+
 @media (max-width: 768px) {
     .post-form-container {
         padding: 1.5rem;

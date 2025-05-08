@@ -13,6 +13,9 @@
     --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     --box-shadow-hover: 0 10px 15px rgba(0, 0, 0, 0.1);
     --transition: all 0.3s ease;
+    --facebook-color: #1877f2;
+    --github-color: #24292e;
+    --apple-color: #000000;
 }
 
 /* Reset and base styles */
@@ -69,7 +72,7 @@ body {
 /* Header styles */
 .header {
     text-align: center;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
 }
 
 .header h1 {
@@ -90,7 +93,7 @@ body {
 .error-message {
     background-color: #fee2e2;
     border: 1px solid var(--error-color);
-    color: #b91c1c;
+    color: #3e19d4;
     padding: 0.75rem 1rem;
     border-radius: 0.5rem;
     margin-bottom: 1.5rem;
@@ -103,6 +106,117 @@ body {
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* OAuth login styles */
+.oauth-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.oauth-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    background-color: white;
+    border: 1px solid var(--border-color);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    position: relative;
+    color: var(--text-dark);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.oauth-button:hover {
+    background-color: #f9fafb;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.oauth-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+.oauth-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.oauth-icon {
+    font-size: 1.25rem;
+    margin-right: 0.75rem;
+}
+
+.facebook-icon {
+    color: var(--facebook-color);
+}
+
+.oauth-button.github {
+    color: white;
+    background-color: var(--github-color);
+    border-color: var(--github-color);
+}
+
+.oauth-button.github:hover {
+    background-color: #2c3440;
+}
+
+.oauth-button.facebook {
+    color: white;
+    background-color: var(--facebook-color);
+    border-color: var(--facebook-color);
+}
+
+.oauth-button.facebook:hover {
+    background-color: #0d65d9;
+}
+
+.oauth-button.apple {
+    color: white;
+    background-color: var(--apple-color);
+    border-color: var(--apple-color);
+}
+
+.oauth-button.apple:hover {
+    background-color: #333333;
+}
+
+.oauth-button.google {
+    border-color: #dadce0;
+}
+
+.oauth-button.google:hover {
+    background-color: #f8f9fa;
+}
+
+/* Separator line */
+.separator {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.5rem 0;
+    color: var(--text-medium);
+    font-size: 0.9rem;
+}
+
+.separator::before,
+.separator::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.separator span {
+    padding: 0 0.75rem;
+    font-weight: 500;
 }
 
 /* Form styles */
@@ -252,6 +366,10 @@ form {
 
     .password-requirements {
         padding: 0.5rem;
+    }
+    
+    .oauth-options {
+        gap: 0.5rem;
     }
 }
 
