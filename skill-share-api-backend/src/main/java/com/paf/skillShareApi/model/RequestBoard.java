@@ -29,11 +29,11 @@ public class RequestBoard {
 
     @ManyToOne(fetch = FetchType.EAGER) // Changed to EAGER to ensure user data is loaded
     @JoinColumn(name = "user_id")
-    @JsonBackReference("user-requestboards")
+    @JsonBackReference("user-request boards")
     private User user;
 
     @OneToMany(mappedBy = "requestBoard", cascade = CascadeType.ALL)
-    @JsonManagedReference("requestboard-bids")
+    @JsonManagedReference("request board-bids")
     private List<Bid> bids = new ArrayList<>();
 
     @Column(name = "is_resolved")

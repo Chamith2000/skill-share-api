@@ -28,7 +28,7 @@ public class Bid {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "request_board_id")
-    @JsonBackReference("requestboard-bids")
+    @JsonBackReference("request board-bids")
     private RequestBoard requestBoard;
 
     @Column(name = "is_accepted")
