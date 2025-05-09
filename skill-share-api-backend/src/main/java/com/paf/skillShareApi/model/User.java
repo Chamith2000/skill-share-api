@@ -32,6 +32,8 @@ public class User {
     @Column(name = "profile_image_url")
     private String profileImageUrl;
 
+    private String googleProfileImage;
+
     @Column(name = "craft_tokens")
     private Integer craftTokens = 0;
 

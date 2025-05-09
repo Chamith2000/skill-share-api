@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { FcGoogle } from 'react-icons/fc'; // Changed from FaGoogle to FcGoogle
-import { FaGithub, FaLinkedin, FaExclamationCircle } from 'react-icons/fa';
+// In LoginPage.js, update the imports and add useLocation
+import React, { useState, useEffect } from 'react'; // Add useEffect
+import { useNavigate, Link, useLocation } from 'react-router-dom'; // Add useLocation
+import { FcGoogle } from 'react-icons/fc';
+import { FaExclamationCircle } from 'react-icons/fa';
 import api from '../api/axios';
 import './LoginPage.css';
 
@@ -10,6 +11,14 @@ const LoginPage = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation(); // Add useLocation
+
+    // Check for error message in location state
+    useEffect(() => {
+        if (location.state?.error) {
+            setError(location.state.error);
+        }
+    }, [location.state]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -32,11 +41,8 @@ const LoginPage = () => {
         }
     };
 
-    const handleOAuthLogin = (provider) => {
-        // In a real implementation, redirect to OAuth provider
-        window.location.href = `/api/oauth/${provider}`;
-        // For demonstration purposes:
-        console.log(`Initiating ${provider} OAuth login flow`);
+    const handleOAuthLogin = () => {
+        window.location.href = 'http://localhost:8080/oauth2/authorization/google';
     };
 
     return (
@@ -103,9 +109,9 @@ const LoginPage = () => {
                 <div className="auth-options">
                     <button
                         className="oauth-button google"
-                        onClick={() => handleOAuthLogin('google')}
+                        onClick={handleOAuthLogin}
                     >
-                        <FcGoogle className="oauth-icon" /> {/* Using FcGoogle instead of FaGoogle */}
+                        <FcGoogle className="oauth-icon" />
                         <span>Sign in with Google</span>
                     </button>
                 </div>
