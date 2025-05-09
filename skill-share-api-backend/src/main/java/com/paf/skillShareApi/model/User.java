@@ -61,7 +61,7 @@ public class User {
     private List<Follow> following = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("user-learningplans")
+    @JsonManagedReference("user-learning plans")
     private List<LearningPlan> learningPlans = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -69,7 +69,7 @@ public class User {
     private List<Notification> notifications = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("user-requestboards")
+    @JsonManagedReference("user-request boards")
     private List<RequestBoard> requestBoards = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)

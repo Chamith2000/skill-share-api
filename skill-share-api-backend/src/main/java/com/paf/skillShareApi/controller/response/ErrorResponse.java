@@ -6,6 +6,9 @@ import lombok.Data;
 public class ErrorResponse {
     private String message;
 
+    public ErrorResponse(String internalServerError, String message) {
+    }
+
     public String getMessage() {
         return message;
     }
