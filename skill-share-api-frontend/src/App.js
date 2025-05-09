@@ -7,6 +7,7 @@ import CreatePostPage from "./pages/CreatePostPage";
 import PostDetailPage from "./pages/PostDetailPage";
 import UserProfilePage from "./pages/UserProfilePage";
 import CreativeBarter from "./pages/CreativeBarter";
+import OAuthSuccess from "./components/OAuthSuccess";
 
 // Simple auth check
 const PrivateRoute = ({ children }) => {
@@ -26,6 +27,7 @@ function App() {
                 <Route path="/posts/:postId" element={<PrivateRoute><PostDetailPage /></PrivateRoute>} />
                 <Route path="/profile" element={<PrivateRoute><UserProfilePage /></PrivateRoute>} />
                 <Route path="/request-board" element={<PrivateRoute><CreativeBarter /></PrivateRoute>} />
+                <Route path="/oauth2/success" element={<OAuthSuccess />} />
 
                 <Route path="*" element={<Navigate to="/login" />} />
             </Routes>

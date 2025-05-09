@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllPosts, getPostById, getCommentsByPostId, createComment, updateComment, deleteComment, updatePost, deletePost, toggleLike, getLikeStatus, followUser, unfollowUser, checkFollowStatus } from '../services/api';
 import './PostList.css';
@@ -18,9 +18,25 @@ const PostList = () => {
     const [likeSubmitting, setLikeSubmitting] = useState({});
     const [followStatus, setFollowStatus] = useState({});
     const [followSubmitting, setFollowSubmitting] = useState({});
+    const [dropdownOpen, setDropdownOpen] = useState(null);
+    const dropdownRef = useRef(null); // Ref to track dropdown element
 
     const user = JSON.parse(localStorage.getItem('user') || 'null');
     console.log('Current user:', user);
+
+    // Handle clicks outside the dropdown to close it
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setDropdownOpen(null);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     useEffect(() => {
         const fetchPostsAndComments = async () => {
@@ -327,6 +343,7 @@ const PostList = () => {
         console.log('Editing post:', post);
         setEditingPost(post.id);
         setEditPostText(post.description);
+        setDropdownOpen(null); // Close dropdown after clicking Edit
     };
 
     const handleCancelPostEdit = () => {
@@ -399,6 +416,7 @@ const PostList = () => {
 
             await deletePost(postId);
             console.log(`Post ${postId} deleted successfully`);
+            setDropdownOpen(null); // Close dropdown after clicking Delete
         } catch (err) {
             console.error('Error deleting post:', err);
             alert(`Failed to delete post: ${err.message}`);
@@ -421,6 +439,10 @@ const PostList = () => {
                 console.error('Error refreshing posts:', refreshErr);
             }
         }
+    };
+
+    const handleToggleDropdown = (postId) => {
+        setDropdownOpen((prev) => (prev === postId ? null : postId));
     };
 
     const canEditPost = (post) => {
@@ -478,8 +500,16 @@ const PostList = () => {
                                     </div>
                                     {canEditPost(post) && (
                                         <div className="post-options">
-                                            <div className="dropdown">
-                                                <span className="options-icon">⋮</span>
+                                            <div
+                                                className={`dropdown ${dropdownOpen === post.id ? 'show-dropdown' : ''}`}
+                                                ref={dropdownRef}
+                                            >
+                                                <span
+                                                    className="options-icon"
+                                                    onClick={() => handleToggleDropdown(post.id)}
+                                                >
+                                                    ⋮
+                                                </span>
                                                 <div className="dropdown-content">
                                                     <button onClick={() => handleEditPost(post)} className="edit-button">Edit Post</button>
                                                     <button onClick={() => handleDeletePost(post.id)} className="delete-button">Delete Post</button>
@@ -577,9 +607,6 @@ const PostList = () => {
                                 <button className="action-button">
                                     <span className="comment-icon">💬</span>
                                     <span>{(commentsByPost[post.id] || []).length}</span>
-                                </button>
-                                <button className="action-button">
-                                    <span className="share-icon">↗️</span>
                                 </button>
                             </div>
 

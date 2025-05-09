@@ -2,7 +2,7 @@
 
 /* Base styling */
 :root {
-    --primary-color: #4267B2;  /* Facebook-likeFYI blue */
+    --primary-color: #4267B2;  /* Facebook-like blue */
     --secondary-color: #E1306C; /* Instagram-like gradient start */
     --tertiary-color: #8A3AB9;  /* Instagram-like gradient middle */
     --accent-color: #405DE6;    /* Instagram-like gradient end */
@@ -127,7 +127,7 @@ body {
 .follow-button {
     padding: 7px 16px;
     border-radius: 20px;
-    font-size: suspected 14px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -579,6 +579,10 @@ body {
     overflow: hidden;
 }
 
+.dropdown.show-dropdown .dropdown-content {
+    display: block;
+}
+
 .comment-delete-btn:hover {
     color: var(--danger-color);
     background-color: rgba(255, 82, 82, 0.1);
@@ -622,282 +626,278 @@ body {
 /* Post edit form */
 .post-edit-form {
     margin-bottom: 20px;
+}
 
-    /* Post edit form */
-    .post-edit-form {
+.post-edit-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    resize: vertical;
+    font-family: inherit;
+    font-size: 16px;
+    margin-bottom: 12px;
+    min-height: 100px;
+}
+
+.post-edit-textarea:focus {
+    border-color: #3897f0;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(56, 151, 240, 0.2);
+}
+
+.post-edit-actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* Loading, error, and no posts states */
+.loading-spinner,
+.error-message,
+.no-posts-message {
+    text-align: center;
+    padding: 40px;
+    font-size: 20px;
+    background-color: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    margin-top: 25px;
+}
+
+.loading-spinner::after {
+    content: "";
+    display: inline-block;
+    width: 36px;
+    height: 36px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3897f0;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-left: 12px;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-message {
+    color: #e53935;
+}
+
+.no-posts-message {
+    color: #757575;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+    .post-list-container {
+        max-width: 900px;
+        padding: 12px;
+    }
+
+    .post-card {
+        border-radius: 12px;
+    }
+
+    .post-header {
+        padding: 15px;
+    }
+
+    .post-description {
+        padding: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .post-list-container {
+        max-width: 700px;
+        padding: 10px;
+    }
+
+    .post-list-header {
+        font-size: 28px;
+    }
+
+    .post-card {
+        border-radius: 10px;
+    }
+
+    .post-header {
+        padding: 12px;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+    }
+
+    .follow-button {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    .media-gallery {
+        gap: 4px;
+    }
+
+    .post-actions {
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .comment-form textarea {
+        padding: 10px 12px;
+    }
+
+    .view-post-link {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .post-list-container {
+        max-width: 100%;
+        padding: 8px;
+    }
+
+    .post-list-header {
+        font-size: 24px;
         margin-bottom: 20px;
     }
 
-    .post-edit-textarea {
+    .posts-list {
+        gap: 20px;
+    }
+
+    .post-card {
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    .post-header {
+        padding: 10px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .user-info {
+        flex-direction: column;
+        align-items: flex-start;
         width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        resize: vertical;
-        font-family: inherit;
-        font-size: 16px;
-        margin-bottom: 12px;
-        min-height: 100px;
     }
 
-    .post-edit-textarea:focus {
-        border-color: #3897f0;
-        outline: none;
-        box-shadow: 0 0 0 2px rgba(56, 151, 240, 0.2);
+    .username-with-follow {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
     }
 
-    .post-edit-actions {
-        display: flex;
-        gap: 12px;
+    .follow-button {
+        margin-left: 0;
+        padding: 5px 10px;
+        font-size: 12px;
     }
 
-    /* Loading, error, and no posts states */
-    .loading-spinner,
-    .error-message,
-    .no-posts-message {
-        text-align: center;
-        padding: 40px;
-        font-size: 20px;
-        background-color: #fff;
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        margin-top: 25px;
-    }
-
-    .loading-spinner::after {
-        content: "";
-        display: inline-block;
+    .user-avatar {
         width: 36px;
         height: 36px;
-        border: 4px solid #f3f3f3;
-        border-top: 4px solid #3897f0;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin-left: 12px;
-        vertical-align: middle;
+        margin-right: 10px;
     }
 
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+    .user-details h3 {
+        font-size: 15px;
     }
 
-    .error-message {
-        color: #e53935;
+    .user-tagline {
+        font-size: 12px;
     }
 
-    .no-posts-message {
-        color: #757575;
+    .post-description {
+        padding: 12px;
+        font-size: 14px;
     }
 
-    /* Responsive adjustments */
-    @media (max-width: 1024px) {
-        .post-list-container {
-            max-width: 900px;
-            padding: 12px;
-        }
-
-        .post-card {
-            border-radius: 12px;
-        }
-
-        .post-header {
-            padding: 15px;
-        }
-
-        .post-description {
-            padding: 15px;
-        }
+    .hashtags {
+        font-size: 13px;
     }
 
-    @media (max-width: 768px) {
-        .post-list-container {
-            max-width: 700px;
-            padding: 10px;
-        }
-
-        .post-list-header {
-            font-size: 28px;
-        }
-
-        .post-card {
-            border-radius: 10px;
-        }
-
-        .post-header {
-            padding: 12px;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-        }
-
-        .follow-button {
-            padding: 6px 12px;
-            font-size: 13px;
-        }
-
-        .media-gallery {
-            gap: 4px;
-        }
-
-        .post-actions {
-            gap: 15px;
-            padding: 15px;
-        }
-
-        .comment-form textarea {
-            padding: 10px 12px;
-        }
-
-        .view-post-link {
-            padding: 12px;
-        }
+    .media-count-2,
+    .media-count-3,
+    .media-count-4,
+    .media-count-5,
+    .media-count-6 {
+        grid-template-columns: 1fr;
     }
 
-    @media (max-width: 480px) {
-        .post-list-container {
-            max-width: 100%;
-            padding: 8px;
-        }
+    .media-item {
+        aspect-ratio: 16 / 9;
+    }
 
-        .post-list-header {
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
+    .media-count-3 .media-item:nth-child(1) {
+        grid-row: auto;
+    }
 
-        .posts-list {
-            gap: 20px;
-        }
+    .post-actions {
+        gap: 10px;
+        padding: 12px;
+    }
 
-        .post-card {
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-        }
+    .action-button {
+        font-size: 15px;
+        padding: 8px 10px;
+    }
 
-        .post-header {
-            padding: 10px;
-            flex-direction: column;
-            align-items: flex-start;
-        }
+    .comments-section {
+        padding: 12px;
+    }
 
-        .user-info {
-            flex-direction: column;
-            align-items: flex-start;
-            width: 100%;
-        }
+    .comment-list {
+        max-height: 180px;
+    }
 
-        .username-with-follow {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 8px;
-        }
+    .comment-item {
+        padding: 8px;
+        margin-bottom: 10px;
+    }
 
-        .follow-button {
-            margin-left: 0;
-            padding: 5px 10px;
-            font-size: 12px;
-        }
+    .comment-item strong {
+        font-size: 14px;
+    }
 
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-            margin-right: 10px;
-        }
+    .comment-item p {
+        font-size: 14px;
+    }
 
-        .user-details h3 {
-            font-size: 15px;
-        }
+    .comment-form {
+        flex-direction: column;
+        gap: 8px;
+    }
 
-        .user-tagline {
-            font-size: 12px;
-        }
+    .comment-form textarea {
+        width: 100%;
+        padding: 8px 10px;
+        font-size: 14px;
+    }
 
-        .post-description {
-            padding: 12px;
-            font-size: 14px;
-        }
+    .comment-form button {
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+    }
 
-        .hashtags {
-            font-size: 13px;
-        }
+    .view-post-link {
+        padding: 10px;
+        font-size: 14px;
+    }
 
-        .media-count-2,
-        .media-count-3,
-        .media-count-4,
-        .media-count-5,
-        .media-count-6 {
-            grid-template-columns: 1fr;
-        }
+    .dropdown-content {
+        min-width: 120px;
+    }
 
-        .media-item {
-            aspect-ratio: 16 / 9;
-        }
-
-        .media-count-3 .media-item:nth-child(1) {
-            grid-row: auto;
-        }
-
-        .post-actions {
-            gap: 10px;
-            padding: 12px;
-        }
-
-        .action-button {
-            font-size: 15px;
-            padding: 8px 10px;
-        }
-
-        .comments-section {
-            padding: 12px;
-        }
-
-        .comment-list {
-            max-height: 180px;
-        }
-
-        .comment-item {
-            padding: 8px;
-            margin-bottom: 10px;
-        }
-
-        .comment-item strong {
-            font-size: 14px;
-        }
-
-        .comment-item p {
-            font-size: 14px;
-        }
-
-        .comment-form {
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .comment-form textarea {
-            width: 100%;
-            padding: 8px 10px;
-            font-size: 14px;
-        }
-
-        .comment-form button {
-            width: 100%;
-            padding: 10px;
-            font-size: 14px;
-        }
-
-        .view-post-link {
-            padding: 10px;
-            font-size: 14px;
-        }
-
-        .dropdown-content {
-            min-width: 120px;
-        }
-
-        .dropdown-content button {
-            padding: 10px 12px;
-            font-size: 13px;
-        }
-    }}
+    .dropdown-content button {
+        padding: 10px 12px;
+        font-size: 13px;
+    }
+}

@@ -20,7 +20,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/register", "/api/login", "/api/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .httpBasic();
+                .oauth2Login(oauth2 -> oauth2
+                        .defaultSuccessUrl("/oauth2/success", true)
+                )
+                .httpBasic(httpBasic -> httpBasic.disable()); // Disable HTTP Basic if not needed
         return http.build();
     }
 
