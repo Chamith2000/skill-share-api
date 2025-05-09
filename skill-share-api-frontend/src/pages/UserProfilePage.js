@@ -1,312 +1,382 @@
-import React, { useState, useEffect } from 'react';
-import { getUserProfile, updateUserProfileFull } from '../services/api';
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import {
+  getUserProfile,
+  updateUserProfile,
+  updateUserProfileFull,
+  uploadProfileImage,
+} from '../services/api';
+import Navbar from './../components/Navbar';
+import { Camera, Save, X, Edit2, User } from 'lucide-react';
 import './UserProfile.css';
-import Navbar from '../components/Navbar';
 
 const UserProfilePage = () => {
-    const [user, setUser] = useState({
-        id: '',
-        username: '',
-        email: '',
-        bio: '',
-        profileImageUrl: '',
-        skillLevel: '',
-        craftTokens: 0,
-        password: ''
-    });
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [saveLoading, setSaveLoading] = useState(false);
 
-    const [isEditing, setIsEditing] = useState(false);
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(null);
-    const [saving, setSaving] = useState(false);
-    const [imagePreview, setImagePreview] = useState(null);
+  const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const DEFAULT_IMAGE = 'https://via.placeholder.com/150?text=Profile';
 
-    const userObj = JSON.parse(localStorage.getItem('user') || 'null');
-    const userId = userObj ? userObj.id : null;
+  const getUserFromLocalStorage = () => JSON.parse(localStorage.getItem('user') || 'null');
 
-    useEffect(() => {
-        if (userId) {
-            fetchUserData();
-        } else {
-            setError('User not authenticated');
-            setLoading(false);
-        }
-    }, [userId]);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const loggedInUser = getUserFromLocalStorage();
+      console.log('Logged-in user from localStorage:', loggedInUser);
 
-    const fetchUserData = async () => {
-        try {
-            setLoading(true);
-            const response = await getUserProfile(userId);
-            setUser(prev => ({ ...response.data, password: '' }));
-            setLoading(false);
-        } catch (err) {
-            setError('Failed to load user profile');
-            setLoading(false);
-            console.error('Error fetching user data:', err);
-        }
-    };
+      if (!loggedInUser || !loggedInUser.id) {
+        setError('User not authenticated. Please log in.');
+        setLoading(false);
+        return;
+      }
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setUser({
-            ...user,
-            [name]: value
+      const userId = loggedInUser.id;
+      console.log('Fetching profile for userId:', userId);
+
+      try {
+        const response = await getUserProfile(userId);
+        console.log('Profile data received:', response.data);
+        setUser(response.data);
+        reset({
+          username: response.data.username,
+          email: response.data.email,
+          bio: response.data.bio,
+          skillLevel: response.data.skillLevel,
         });
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+        setError(err.message.includes('UserNotFound') ? 'User not found' : err.message);
+        setLoading(false);
+      }
     };
+    fetchProfile();
+  }, [reset]);
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file && file.size > 5 * 1024 * 1024) { // 5MB limit
-            setError('Image file size exceeds 5MB limit');
-            return;
-        }
-        setSelectedFile(file);
+  useEffect(() => {
+    console.log('Current user state:', user);
+  }, [user]);
 
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result);
-            };
-            reader.readAsDataURL(file);
-        } else {
-            setImagePreview(null);
-        }
-    };
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-    const saveProfile = async () => {
-        try {
-            setSaving(true);
-            setError(null);
-            setSuccess(null);
-
-            const profileData = {
-                id: user.id,
-                username: user.username,
-                email: user.email,
-                bio: user.bio,
-                skillLevel: user.skillLevel
-            };
-
-            if (user.password && user.password.trim() !== '') {
-                profileData.password = user.password;
-            }
-
-            const response = await updateUserProfileFull(userId, profileData, selectedFile);
-
-            setUser({ ...response.data, password: '' });
-            setIsEditing(false);
-            setSelectedFile(null);
-            setImagePreview(null);
-            setSuccess('Profile updated successfully!');
-            setSaving(false);
-            setTimeout(() => setSuccess(null), 3000); // Clear success after 3s
-        } catch (err) {
-            setError('Failed to update profile: ' + (err.response?.data?.message || err.message));
-            setSaving(false);
-            console.error('Error updating profile:', err);
-        }
-    };
-
-    if (loading) {
-        return (
-            <div className="loading">
-                <span className="loading-spinner"></span>
-                Loading profile...
-            </div>
-        );
+  const onSubmit = async (data) => {
+    setSaveLoading(true);
+    const loggedInUser = getUserFromLocalStorage();
+    if (!loggedInUser || !loggedInUser.id) {
+      setError('User not authenticated. Please log in.');
+      setSaveLoading(false);
+      return;
     }
 
-    if (error) {
-        return (
-            <div className="error-container">
-                <div className="alert alert-error">{error}</div>
-                <button onClick={fetchUserData} className="retry-btn" aria-label="Retry loading profile">
-                    Retry
-                </button>
-            </div>
-        );
+    const userId = loggedInUser.id;
+    try {
+      if (imageFile) {
+        const profileData = { ...data };
+        const response = await updateUserProfileFull(userId, profileData, imageFile);
+        console.log('Full update response:', response.data);
+        setUser(response.data);
+        setImageFile(null);
+        setImagePreview(null);
+      } else {
+        const response = await updateUserProfile(userId, data);
+        console.log('Partial update response:', response.data);
+        setUser(response.data);
+      }
+      setIsEditing(false);
+      
+      // Show success notification
+      const notification = document.createElement('div');
+      notification.className = 'success-notification';
+      notification.textContent = 'Profile updated successfully!';
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.classList.add('show');
+        setTimeout(() => {
+          notification.classList.remove('show');
+          setTimeout(() => {
+            document.body.removeChild(notification);
+          }, 300);
+        }, 3000);
+      }, 100);
+      
+      setSaveLoading(false);
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      setError(err.response?.data?.message || err.message);
+      setSaveLoading(false);
+    }
+  };
+
+  const handleImageUpload = async () => {
+    setSaveLoading(true);
+    const loggedInUser = getUserFromLocalStorage();
+    if (!loggedInUser || !loggedInUser.id) {
+      setError('User not authenticated. Please log in.');
+      setSaveLoading(false);
+      return;
     }
 
+    const userId = loggedInUser.id;
+    if (!imageFile) {
+      setError('Please select an image to upload.');
+      setSaveLoading(false);
+      return;
+    }
+    try {
+      const response = await uploadProfileImage(userId, imageFile);
+      console.log('Uploaded image response:', response.data);
+      setUser((prev) => ({ ...prev, profilePhotoUrl: response.data.imageUrl }));
+      setImageFile(null);
+      setImagePreview(null);
+      
+      // Show success notification
+      const notification = document.createElement('div');
+      notification.className = 'success-notification';
+      notification.textContent = 'Profile image uploaded successfully!';
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.classList.add('show');
+        setTimeout(() => {
+          notification.classList.remove('show');
+          setTimeout(() => {
+            document.body.removeChild(notification);
+          }, 300);
+        }, 3000);
+      }, 100);
+      
+      setSaveLoading(false);
+    } catch (err) {
+      console.error('Error uploading image:', err);
+      setError(err.response?.data?.message || 'Failed to upload image: Invalid server response');
+      setSaveLoading(false);
+    }
+  };
+
+  const handleImageError = (e) => {
+    console.error('Error loading image:', user?.profilePhotoUrl);
+    e.target.src = DEFAULT_IMAGE;
+  };
+
+  if (loading) {
     return (
-        <div>
-            <Navbar />
-            <div className="profile-container">
-                {success && (
-                    <div className="alert alert-success success-animation">
-                        {success}
-                    </div>
-                )}
-                <div className="profile-header">
-                    <div className="profile-image-container">
-                        {imagePreview ? (
-                            <img src={imagePreview} alt="Preview" className="profile-image" />
-                        ) : user.profileImageUrl ? (
-                            <img src={user.profileImageUrl} alt="Profile" className="profile-image" />
-                        ) : (
-                            <div className="profile-image-placeholder">
-                                {user.username ? user.username.charAt(0).toUpperCase() : '?'}
-                            </div>
-                        )}
-
-                        {isEditing && (
-                            <div className="image-upload-section">
-                                <input
-                                    type="file"
-                                    onChange={handleFileChange}
-                                    className="file-input"
-                                    accept="image/*"
-                                    id="profile-image-input"
-                                    aria-label="Upload profile image"
-                                />
-                                <label htmlFor="profile-image-input" className="file-input-label">
-                                    Choose Image
-                                </label>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="profile-info">
-                        <h1>{user.username}</h1>
-                        <div className="profile-details">
-                            <span className="craft-tokens">
-                                <i className="token-icon">🪙</i> {user.craftTokens} Craft Tokens
-                            </span>
-                            <span className="skill-level">
-                                Level: {user.skillLevel || 'Not set'}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="profile-body">
-                    {isEditing ? (
-                        <div className="edit-form">
-                            <div className="form-group">
-                                <label htmlFor="username">Username</label>
-                                <input
-                                    id="username"
-                                    type="text"
-                                    name="username"
-                                    value={user.username || ''}
-                                    onChange={handleInputChange}
-                                    required
-                                    aria-required="true"
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="email">Email</label>
-                                <input
-                                    id="email"
-                                    type="email"
-                                    name="email"
-                                    value={user.email || ''}
-                                    onChange={handleInputChange}
-                                    required
-                                    aria-required="true"
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="password">New Password</label>
-                                <input
-                                    id="password"
-                                    type="password"
-                                    name="password"
-                                    value={user.password || ''}
-                                    onChange={handleInputChange}
-                                    placeholder="Enter new password (optional)"
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="bio">Bio</label>
-                                <textarea
-                                    id="bio"
-                                    name="bio"
-                                    value={user.bio || ''}
-                                    onChange={handleInputChange}
-                                    rows="4"
-                                    aria-label="User bio"
-                                />
-                            </div>
-
-                            <div className="form-group">
-                                <label htmlFor="skillLevel">Skill Level</label>
-                                <select
-                                    id="skillLevel"
-                                    name="skillLevel"
-                                    value={user.skillLevel || ''}
-                                    onChange={handleInputChange}
-                                    aria-label="Select skill level"
-                                >
-                                    <option value="">Select Skill Level</option>
-                                    <option value="BEGINNER">Beginner</option>
-                                    <option value="INTERMEDIATE">Intermediate</option>
-                                    <option value="ADVANCED">Advanced</option>
-                                    <option value="EXPERT">Expert</option>
-                                </select>
-                            </div>
-
-                            <div className="button-group">
-                                <button
-                                    onClick={saveProfile}
-                                    className="save-btn"
-                                    disabled={saving}
-                                    aria-label="Save profile changes"
-                                >
-                                    {saving ? (
-                                        <>
-                                            <span className="loading-spinner"></span>
-                                            Saving...
-                                        </>
-                                    ) : (
-                                        'Save Profile'
-                                    )}
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        setIsEditing(false);
-                                        setSelectedFile(null);
-                                        setImagePreview(null);
-                                        setUser(prev => ({ ...prev, password: '' }));
-                                        fetchUserData();
-                                    }}
-                                    className="cancel-btn"
-                                    disabled={saving}
-                                    aria-label="Cancel editing"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="profile-content">
-                            <div className="bio-section">
-                                <h3>Bio</h3>
-                                <p>{user.bio || 'No bio information provided yet.'}</p>
-                            </div>
-
-                            <div className="contact-info">
-                                <h3>Contact Information</h3>
-                                <p>Email: {user.email}</p>
-                            </div>
-
-                            <button
-                                onClick={() => setIsEditing(true)}
-                                className="edit-btn"
-                                aria-label="Edit profile"
-                            >
-                                Edit Profile
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading profile...</p>
+      </div>
     );
+  }
+  
+  if (error) {
+    return (
+      <div className="error-container">
+        <div className="error-icon">!</div>
+        <h2>Something went wrong</h2>
+        <p>{error}</p>
+        <button onClick={() => window.location.reload()} className="reload-btn">
+          Try Again
+        </button>
+      </div>
+    );
+  }
+  
+  if (!user) return (
+    <div className="not-found-container">
+      <User size={48} />
+      <h2>User not found</h2>
+      <p>We couldn't find the user profile you're looking for.</p>
+    </div>
+  );
+
+  return (
+    <div className="app-container">
+      <Navbar />
+      <div className="user-profile-page">
+        <div className="profile-card">
+          <div className="profile-header">
+            <h1>My Profile</h1>
+            {!isEditing ? (
+              <button 
+                className="edit-button"
+                onClick={() => setIsEditing(true)}
+              >
+                <Edit2 size={16} />
+                <span>Edit</span>
+              </button>
+            ) : (
+              <div className="edit-actions">
+                <button 
+                  className="cancel-button"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setImagePreview(null);
+                    setImageFile(null);
+                  }}
+                >
+                  <X size={16} />
+                  <span>Cancel</span>
+                </button>
+              </div>
+            )}
+          </div>
+          
+          <div className="profile-content">
+            <div className="profile-image-container">
+              <div className="profile-image-wrapper">
+                <img
+                  src={imagePreview || user.profilePhotoUrl || DEFAULT_IMAGE}
+                  alt="Profile"
+                  className="profile-img"
+                  onError={handleImageError}
+                />
+                
+                {isEditing && (
+                  <label className="image-upload-label">
+                    <Camera size={20} />
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/gif"
+                      onChange={handleImageChange}
+                      className="hidden-file-input"
+                    />
+                  </label>
+                )}
+              </div>
+              
+              {isEditing && imagePreview && (
+                <button 
+                  className="upload-image-button"
+                  onClick={handleImageUpload}
+                  disabled={saveLoading}
+                >
+                  {saveLoading ? 'Uploading...' : 'Upload Image'}
+                </button>
+              )}
+              
+              <div className="token-badge">
+                <span>{user.craftTokens || 0}</span>
+                <span>Tokens</span>
+              </div>
+            </div>
+            
+            <div className="profile-details">
+              {!isEditing ? (
+                <div className="profile-info">
+                  <div className="info-group">
+                    <h3>Username</h3>
+                    <p>{user.username}</p>
+                  </div>
+                  
+                  <div className="info-group">
+                    <h3>Email</h3>
+                    <p>{user.email}</p>
+                  </div>
+                  
+                  <div className="info-group">
+                    <h3>Skill Level</h3>
+                    <p className={`skill-badge ${user.skillLevel?.toLowerCase() || 'none'}`}>
+                      {user.skillLevel || 'Not specified'}
+                    </p>
+                  </div>
+                  
+                  <div className="info-group bio-group">
+                    <h3>Bio</h3>
+                    <p className="bio-text">{user.bio || 'No bio available'}</p>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit(onSubmit)} className="edit-form">
+                  <div className="form-group">
+                    <label>Username</label>
+                    <input
+                      {...register('username', { required: 'Username is required' })}
+                      defaultValue={user.username}
+                      className={errors.username ? 'error-input' : ''}
+                    />
+                    {errors.username && <span className="error-message">{errors.username.message}</span>}
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Email</label>
+                    <input
+                      {...register('email', {
+                        required: 'Email is required',
+                        pattern: {
+                          value: /\S+@\S+\.\S+/,
+                          message: 'Invalid email address',
+                        },
+                      })}
+                      defaultValue={user.email}
+                      className={errors.email ? 'error-input' : ''}
+                    />
+                    {errors.email && <span className="error-message">{errors.email.message}</span>}
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Skill Level</label>
+                    <select 
+                      {...register('skillLevel')} 
+                      defaultValue={user.skillLevel || ''}
+                      className="skill-select"
+                    >
+                      <option value="">Select Skill Level</option>
+                      <option value="Beginner">Beginner</option>
+                      <option value="Intermediate">Intermediate</option>
+                      <option value="Advanced">Advanced</option>
+                    </select>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Bio</label>
+                    <textarea 
+                      {...register('bio')} 
+                      defaultValue={user.bio || ''}
+                      placeholder="Tell us about yourself..."
+                      rows={4}
+                    />
+                  </div>
+                  
+                  <button 
+                    type="submit" 
+                    className="save-button"
+                    disabled={saveLoading}
+                  >
+                    {saveLoading ? (
+                      <>
+                        <div className="button-spinner"></div>
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save size={16} />
+                        <span>Save Changes</span>
+                      </>
+                    )}
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default UserProfilePage;
