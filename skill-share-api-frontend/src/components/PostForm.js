@@ -25,18 +25,25 @@ const PostForm = () => {
         setIsSubmitting(true);
         setError(null);
         setSuccess(false);
-
+    
         if (!userId) {
             setError('User is not logged in.');
             setIsSubmitting(false);
             return;
         }
-
+    
+        // Validate description
+        if (!description.trim()) {
+            setError('Description cannot be empty.');
+            setIsSubmitting(false);
+            return;
+        }
+    
         try {
             const formData = new FormData();
-            formData.append('description', description);
+            formData.append('description', description.trim());
             files.forEach((file) => formData.append('files', file));
-
+    
             await createPost(userId, formData);
             setSuccess(true);
             setDescription('');
@@ -46,7 +53,7 @@ const PostForm = () => {
             }
             setTimeout(() => setSuccess(false), 3000);
         } catch (err) {
-            setError('Failed to create post. Please try again.');
+            setError(err.message || 'Failed to create post. Please try again.');
             console.error('Error creating post:', err);
         } finally {
             setIsSubmitting(false);

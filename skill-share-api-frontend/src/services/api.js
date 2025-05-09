@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api';
+const API_BASE_URL = 'http://localhost:8080/api';
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -29,7 +29,6 @@ api.interceptors.request.use(config => {
 });
 
 api.interceptors.response.use(response => {
-    // Attempt to parse string response.data if it's not an object
     if (response.data && typeof response.data === 'string') {
         try {
             response.data = JSON.parse(response.data);
@@ -54,63 +53,66 @@ api.interceptors.response.use(response => {
 // User APIs
 export const getUserProfile = async (userId) => {
     try {
-      const response = await api.get(`/profile/${userId}`);
-      return response;
+        const response = await api.get(`/profile/${userId}`);
+        return response;
     } catch (error) {
-      console.error('Error in getUserProfile:', error.response?.data || error.message);
-      throw new Error(error.response?.data?.message || 'Failed to fetch profile');
+        console.error('Error in getUserProfile:', error.response?.data || error.message);
+        throw new Error(error.response?.data?.message || 'Failed to fetch profile');
     }
-  };
-  
-  export const updateUserProfile = async (userId, data) => {
+};
+
+export const updateUserProfile = async (userId, data) => {
     try {
-      const response = await api.patch(`/profile/${userId}`, data, {
-        headers: {
-          userId: userId.toString(),
-        },
-      });
-      return response;
+        const response = await api.patch(`/profile/${userId}`, data, {
+            headers: {
+                userId: userId.toString(),
+            },
+        });
+        return response;
     } catch (error) {
-      console.error('Error in updateUserProfile:', error.response?.data || error.message);
-      throw new Error(error.response?.data?.message || 'Failed to update profile');
+        console.error('Error in updateUserProfile:', error.response?.data || error.message);
+        throw new Error(error.response?.data?.message || 'Failed to update profile');
     }
-  };
-  
-  export const uploadProfileImage = async (userId, imageFile) => {
+};
+
+export const uploadProfileImage = async (userId, imageFile) => {
     try {
-      const formData = new FormData();
-      formData.append('image', imageFile);
-      const response = await api.post(`/profile/${userId}/upload-image`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          userId: userId.toString(),
-        },
-      });
-      return response;
-    } catch (error) {
-      console.error('Error in uploadProfileImage:', error.response?.data || error.message);
-      throw new Error(error.response?.data?.message || 'Failed to upload image');
-    }
-  };
-  
-  export const updateUserProfileFull = async (userId, profileData, imageFile) => {
-    try {
-      const formData = new FormData();
-      formData.append('user', JSON.stringify(profileData));
-      if (imageFile) {
+        const formData = new FormData();
         formData.append('image', imageFile);
-      }
-      const response = await api.put(`/profile/${userId}/full-update`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          userId: userId.toString(),
-        },
-      });
-      return response;
+        const response = await api.post(`/profile/${userId}/upload-image`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                userId: userId.toString(),
+            },
+        });
+        return response;
     } catch (error) {
-      console.error('Error in updateUserProfileFull:', error.response?.data || error.message);
-      throw new Error(error.response?.data?.message || 'Failed to update profile with image');
-    }}
+        console.error('Error in uploadProfileImage:', error.response?.data || error.message);
+        throw new Error(error.response?.data?.message || 'Failed to upload image');
+    }
+};
+
+export const updateUserProfileFull = async (userId, profileData, imageFile) => {
+    try {
+        const formData = new FormData();
+        formData.append('user', JSON.stringify(profileData));
+        if (imageFile) {
+            formData.append('image', imageFile);
+        }
+        const response = await api.put(`/profile/${userId}/full-update`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                userId: userId.toString(),
+            },
+        });
+        return response;
+    } catch (error) {
+        console.error('Error in updateUserProfileFull:', error.response?.data || error.message);
+        throw new Error(error.response?.data?.message || 'Failed to update profile with image');
+    }
+};
+
+
 // Post APIs
 export const getAllPosts = () =>
     api.get('/posts').catch(err => {
@@ -166,9 +168,23 @@ export const deletePost = (postId) => {
     });
 };
 
+export const likePost = (postId) => {
+    const user = getUser();
+    if (!user || !user.id) {
+        return Promise.reject(new Error('User not authenticated'));
+    }
+
+    return api.post(`/posts/${postId}/like`, null, {
+        headers: { userId: user.id },
+    }).catch(err => {
+        console.error(`Like post ${postId} error:`, err.response?.data || err.message);
+        throw err;
+    });
+};
+
 // Comment APIs
 export const getCommentsByPostId = (postId) =>
-    api.get(`/posts/${postId}/comments`).catch(err => {
+    api.get(`/comments/${postId}`).catch(err => {
         console.error(`Get comments for post ${postId} error:`, err.response?.data || err.message);
         throw err;
     });
@@ -179,7 +195,7 @@ export const createComment = (postId, commentData) => {
         return Promise.reject(new Error('User not authenticated'));
     }
 
-    return api.post(`/posts/${postId}/comments`, commentData, {
+    return api.post(`/comments/${postId}`, commentData, {
         headers: { userId: user.id },
     }).catch(err => {
         console.error(`Create comment for post ${postId} error:`, err.response?.data || err.message);
@@ -193,7 +209,7 @@ export const updateComment = (postId, commentId, commentData) => {
         return Promise.reject(new Error('User not authenticated'));
     }
 
-    return api.put(`/posts/${postId}/comments/${commentId}`, commentData, {
+    return api.put(`/comments/${commentId}`, commentData, {
         headers: { userId: user.id },
     }).catch(err => {
         console.error(`Update comment ${commentId} error:`, err.response?.data || err.message);
@@ -207,7 +223,7 @@ export const deleteComment = (postId, commentId) => {
         return Promise.reject(new Error('User not authenticated'));
     }
 
-    return api.delete(`/posts/${postId}/comments/${commentId}`, {
+    return api.delete(`/comments/${commentId}`, {
         headers: { userId: user.id },
     }).catch(err => {
         console.error(`Delete comment ${commentId} error:`, err.response?.data || err.message);
@@ -222,7 +238,7 @@ export const toggleLike = async (postId, userId) => {
         return Promise.reject(new Error('User not authenticated'));
     }
 
-    return api.post(`/posts/${postId}/likes`, { userId }, {
+    return api.post(`/posts/${postId}/likes/${userId}`, null, {
         headers: { userId: user.id },
     }).catch(err => {
         console.error(`Toggle like for post ${postId} error:`, err.response?.data || err.message);
@@ -236,8 +252,7 @@ export const getLikeStatus = async (postId, userId) => {
         return Promise.reject(new Error('User not authenticated'));
     }
 
-    return api.get(`/posts/${postId}/likes/status`, {
-        params: { userId },
+    return api.get(`/posts/${postId}/likes/${userId}/status`, {
         headers: { userId: user.id },
     }).catch(err => {
         console.error(`Get like status for post ${postId} error:`, err.response?.data || err.message);
@@ -251,89 +266,73 @@ export const getLikeCount = async (postId) =>
         throw err;
     });
 
-// Follow APIs
+// Follow a user
 export const followUser = async (followerId, followeeId) => {
-    const user = getUser();
-    if (!user || !user.id) {
-        return Promise.reject(new Error('User not authenticated'));
+    try {
+        const response = await axios.post(`${API_BASE_URL}/follows`, {
+            followerId,
+            followeeId
+        });
+        return response;
+    } catch (error) {
+        console.error('Error following user:', error);
+        throw error;
     }
-
-    return api.post(`/users/${followerId}/follow`, { followeeId }, {
-        headers: { userId: user.id },
-    }).catch(err => {
-        console.error(`Follow user ${followeeId} error:`, err.response?.data || err.message);
-        throw err;
-    });
 };
 
+// Unfollow a user
 export const unfollowUser = async (followerId, followeeId) => {
-    const user = getUser();
-    if (!user || !user.id) {
-        return Promise.reject(new Error('User not authenticated'));
+    try {
+        const response = await axios.delete(`${API_BASE_URL}/follows/${followerId}/${followeeId}`);
+        return response;
+    } catch (error) {
+        console.error('Error unfollowing user:', error);
+        throw error;
     }
-
-    return api.delete(`/users/${followerId}/follow/${followeeId}`, {
-        headers: { userId: user.id },
-    }).catch(err => {
-        console.error(`Unfollow user ${followeeId} error:`, err.response?.data || err.message);
-        throw err;
-    });
 };
 
+// Check if a user is following another user
 export const checkFollowStatus = async (followerId, followeeId) => {
-    const user = getUser();
-    if (!user || !user.id) {
-        return Promise.reject(new Error('User not authenticated'));
+    try {
+        const response = await axios.get(`${API_BASE_URL}/follows/status/${followerId}/${followeeId}`);
+        return response;
+    } catch (error) {
+        console.error('Error checking follow status:', error);
+        throw error;
     }
-
-    return api.get(`/users/${followerId}/follow/${followeeId}`, {
-        headers: { userId: user.id },
-    }).catch(err => {
-        console.error(`Check follow status for ${followerId}/${followeeId} error:`, err.response?.data || err.message);
-        throw err;
-    });
 };
 
+// Get followers of a user
 export const getFollowers = async (userId) => {
-    const user = getUser();
-    if (!user || !user.id) {
-        return Promise.reject(new Error('User not authenticated'));
+    try {
+        const response = await axios.get(`${API_BASE_URL}/follows/followers/${userId}`);
+        return response;
+    } catch (error) {
+        console.error('Error getting followers:', error);
+        throw error;
     }
-
-    return api.get(`/users/${userId}/followers`, {
-        headers: { userId: user.id },
-    }).catch(err => {
-        console.error(`Get followers for user ${userId} error:`, err.response?.data || err.message);
-        throw err;
-    });
 };
 
+// Get users that a user is following
 export const getFollowing = async (userId) => {
-    const user = getUser();
-    if (!user || !user.id) {
-        return Promise.reject(new Error('User not authenticated'));
+    try {
+        const response = await axios.get(`${API_BASE_URL}/follows/following/${userId}`);
+        return response;
+    } catch (error) {
+        console.error('Error getting following users:', error);
+        throw error;
     }
-
-    return api.get(`/users/${userId}/following`, {
-        headers: { userId: user.id },
-    }).catch(err => {
-        console.error(`Get following for user ${userId} error:`, err.response?.data || err.message);
-        throw err;
-    });
 };
 
+// Get follow counts (followers and following)
 export const getFollowCounts = async (userId) => {
-    const user = getUser();
-    if (!user || !user.id) {
-        return Promise.reject(new Error('User not authenticated'));
+    try {
+        const response = await axios.get(`${API_BASE_URL}/follows/counts/${userId}`);
+        return response;
+    } catch (error) {
+        console.error('Error getting follow counts:', error);
+        throw error;
     }
-
-    return api.get(`/users/${userId}/follow/counts`, {
-        headers: { userId: user.id },
-    }).catch(err => {
-        console.error(`Get follow counts for user ${userId} error:`, err.response?.data || err.message);
-        throw err;
-    });
 };
 
 // Notification APIs
@@ -364,5 +363,35 @@ export const markNotificationAsRead = async (notificationId) => {
         throw err;
     });
 };
+
+// export const updateUserProfileFull = async (userId, profileData, imageFile) => {
+//     const user = getUser();
+//     if (!user || !user.id) {
+//         return Promise.reject(new Error('User not authenticated'));
+//     }
+
+//     const formData = new FormData();
+
+//     // Add the user data as JSON
+//     formData.append('user', new Blob(
+//         [JSON.stringify(profileData)],
+//         { type: 'application/json' }
+//     ));
+
+//     // Add the image if provided
+//     if (imageFile) {
+//         formData.append('image', imageFile);
+//     }
+
+//     return api.put(`/profile/${userId}/full-update`, formData, {
+//         headers: {
+//             userId: user.id,
+//             'Content-Type': 'multipart/form-data'
+//         },
+//     }).catch(err => {
+//         console.error(`Update profile with image error:`, err.response?.data || err.message);
+//         throw err;
+//     });
+// };
 
 export default api;
