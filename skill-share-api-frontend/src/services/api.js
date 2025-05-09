@@ -3,115 +3,54 @@ import axios from 'axios';
 const API_BASE_URL = 'http://localhost:8080/api';
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  },
-  withCredentials: true,
+    baseURL: API_BASE_URL,
 });
 
 // Helper function to get user from localStorage
 const getUser = () => JSON.parse(localStorage.getItem('user') || 'null');
 
-// Interceptor to add userId header and handle errors
-api.interceptors.request.use(config => {
-    const user = getUser();
-    if (user && user.id) {
-        config.headers['userId'] = user.id;
-    } else {
-        console.warn('No valid user found in localStorage for request:', config.url);
-    }
-    return config;
-}, error => {
-    console.error('Request interceptor error:', error);
-    return Promise.reject(error);
-});
-
-api.interceptors.response.use(response => {
-    if (response.data && typeof response.data === 'string') {
-        try {
-            response.data = JSON.parse(response.data);
-            console.log('Parsed string response.data:', response.data);
-        } catch (parseError) {
-            console.error('Failed to parse response.data string:', parseError, 'Raw data:', response.data);
-            throw new Error('Invalid JSON response from server');
-        }
-    }
-    return response;
-}, error => {
-    if (error.code === 'ECONNABORTED') {
-        return Promise.reject(new Error('Request timed out. Please check if the server is running.'));
-    }
-    if (!error.response) {
-        return Promise.reject(new Error('Network Error: Unable to reach the server. Please check your connection or server status.'));
-    }
-    const message = error.response.data?.message || error.response.data?.error || error.message;
-    return Promise.reject(new Error(`Server Error: ${message} (Status: ${error.response.status})`));
-});
-
 // User APIs
-export const getUserProfile = async (userId) => {
-    try {
-        const response = await api.get(`/profile/${userId}`);
-        return response;
-    } catch (error) {
-        console.error('Error in getUserProfile:', error.response?.data || error.message);
-        throw new Error(error.response?.data?.message || 'Failed to fetch profile');
-    }
-};
+export const getUserProfile = async (userId) =>
+    api.get(`/profile/${userId}`).catch(err => {
+        console.error(`Get user profile for user ${userId} error:`, err.response?.data || err.message);
+        throw err;
+    });
 
-export const updateUserProfile = async (userId, data) => {
-    try {
-        const response = await api.patch(`/profile/${userId}`, data, {
-            headers: {
-                userId: userId.toString(),
-            },
-        });
-        return response;
-    } catch (error) {
-        console.error('Error in updateUserProfile:', error.response?.data || error.message);
-        throw new Error(error.response?.data?.message || 'Failed to update profile');
-    }
-};
-
+// Profile Image Upload API
 export const uploadProfileImage = async (userId, imageFile) => {
-    try {
-        const formData = new FormData();
-        formData.append('image', imageFile);
-        const response = await api.post(`/profile/${userId}/upload-image`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                userId: userId.toString(),
-            },
-        });
-        return response;
-    } catch (error) {
-        console.error('Error in uploadProfileImage:', error.response?.data || error.message);
-        throw new Error(error.response?.data?.message || 'Failed to upload image');
+    const user = getUser();
+    if (!user || !user.id) {
+        return Promise.reject(new Error('User not authenticated'));
     }
+
+    const formData = new FormData();
+    formData.append('image', imageFile);
+
+    return api.post(`/profile/${userId}/upload-image`, formData, {
+        headers: {
+            userId: user.id,
+            'Content-Type': 'multipart/form-data'
+        },
+    }).catch(err => {
+        console.error(`Upload profile image error:`, err.response?.data || err.message);
+        throw err;
+    });
 };
 
-export const updateUserProfileFull = async (userId, profileData, imageFile) => {
-    try {
-        const formData = new FormData();
-        formData.append('user', JSON.stringify(profileData));
-        if (imageFile) {
-            formData.append('image', imageFile);
-        }
-        const response = await api.put(`/profile/${userId}/full-update`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                userId: userId.toString(),
-            },
-        });
-        return response;
-    } catch (error) {
-        console.error('Error in updateUserProfileFull:', error.response?.data || error.message);
-        throw new Error(error.response?.data?.message || 'Failed to update profile with image');
+// Update Profile API
+export const updateUserProfile = async (userId, profileData) => {
+    const user = getUser();
+    if (!user || !user.id) {
+        return Promise.reject(new Error('User not authenticated'));
     }
-};
 
+    return api.put(`/profile/${userId}`, profileData, {
+        headers: { userId: user.id },
+    }).catch(err => {
+        console.error(`Update profile error:`, err.response?.data || err.message);
+        throw err;
+    });
+};
 
 // Post APIs
 export const getAllPosts = () =>
@@ -364,34 +303,34 @@ export const markNotificationAsRead = async (notificationId) => {
     });
 };
 
-// export const updateUserProfileFull = async (userId, profileData, imageFile) => {
-//     const user = getUser();
-//     if (!user || !user.id) {
-//         return Promise.reject(new Error('User not authenticated'));
-//     }
+export const updateUserProfileFull = async (userId, profileData, imageFile) => {
+    const user = getUser();
+    if (!user || !user.id) {
+        return Promise.reject(new Error('User not authenticated'));
+    }
 
-//     const formData = new FormData();
+    const formData = new FormData();
 
-//     // Add the user data as JSON
-//     formData.append('user', new Blob(
-//         [JSON.stringify(profileData)],
-//         { type: 'application/json' }
-//     ));
+    // Add the user data as JSON
+    formData.append('user', new Blob(
+        [JSON.stringify(profileData)],
+        { type: 'application/json' }
+    ));
 
-//     // Add the image if provided
-//     if (imageFile) {
-//         formData.append('image', imageFile);
-//     }
+    // Add the image if provided
+    if (imageFile) {
+        formData.append('image', imageFile);
+    }
 
-//     return api.put(`/profile/${userId}/full-update`, formData, {
-//         headers: {
-//             userId: user.id,
-//             'Content-Type': 'multipart/form-data'
-//         },
-//     }).catch(err => {
-//         console.error(`Update profile with image error:`, err.response?.data || err.message);
-//         throw err;
-//     });
-// };
+    return api.put(`/profile/${userId}/full-update`, formData, {
+        headers: {
+            userId: user.id,
+            'Content-Type': 'multipart/form-data'
+        },
+    }).catch(err => {
+        console.error(`Update profile with image error:`, err.response?.data || err.message);
+        throw err;
+    });
+};
 
 export default api;
