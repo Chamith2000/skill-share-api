@@ -16,6 +16,25 @@ export const getUserProfile = async (userId) =>
         throw err;
     });
 
+    // Add a request interceptor for auth headers
+    api.interceptors.request.use(
+        (config) => {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            if (user && user.token) {
+                config.headers['Authorization'] = `Bearer ${user.token}`;
+                console.log('Adding Authorization header:', config.headers['Authorization']); // Debug
+            } else {
+                console.log('No token found in localStorage'); // Debug
+            }
+            return config;
+        },
+        (error) => {
+            console.error('Request interceptor error:', error);
+            return Promise.reject(error);
+        }
+    );
+
+
 // Profile Image Upload API
 export const uploadProfileImage = async (userId, imageFile) => {
     const user = getUser();
@@ -333,4 +352,35 @@ export const updateUserProfileFull = async (userId, profileData, imageFile) => {
     });
 };
 
+// Learning plan endpoints
+export const getAllLearningPlans = async () => {
+    const response = await api.get('/api/learning-plans');
+    return response.data;
+};
+
+export const createLearningPlan = async (data) => {
+    const response = await api.post('/api/learning-plans', data);
+    return response.data;
+};
+
+export const updateLearningPlan = async (id, data) => {
+    const response = await api.put(`/api/learning-plans/${id}`, data);
+    return response.data;
+};
+
+export const deleteLearningPlan = async (id) => {
+    await api.delete(`/api/learning-plans/${id}`);
+};
+
+export const completeTask = async (taskId) => {
+    const response = await api.patch(`/api/learning-plans/tasks/${taskId}/complete`);
+    return response.data;
+};
+
+export const createLearningPlansBatch = async (data) => {
+    const response = await api.post('/api/learning-plans/batch', data);
+    return response.data;
+};
+
 export default api;
+
