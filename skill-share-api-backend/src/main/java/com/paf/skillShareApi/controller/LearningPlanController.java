@@ -1,8 +1,9 @@
 package com.paf.skillShareApi.controller;
 
-import com.paf.skillShareApi.controller.request.CreateLearningPlanRequestDTO;
+import com.paf.skillShareApi.controller.request.CreateLearningPlanDTO;
 import com.paf.skillShareApi.model.LearningPlan;
 import com.paf.skillShareApi.model.ProgressUpdate;
+import com.paf.skillShareApi.model.Task;
 import com.paf.skillShareApi.service.LearningPlanService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,40 +21,32 @@ public class LearningPlanController {
     private LearningPlanService learningPlanService;
 
     @PostMapping
-    public ResponseEntity<LearningPlan> createLearningPlan(@Valid @RequestBody CreateLearningPlanRequestDTO request) {
+    public ResponseEntity<LearningPlan> createLearningPlan(@Valid @RequestBody CreateLearningPlanDTO request) {
         LearningPlan learningPlan = learningPlanService.createLearningPlan(request);
         return ResponseEntity.ok(learningPlan);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<LearningPlan> getLearningPlan(@PathVariable Long id) {
-        LearningPlan learningPlan = learningPlanService.getLearningPlan(id);
-        return ResponseEntity.ok(learningPlan);
-    }
-
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<LearningPlan>> getAllLearningPlansByUserId(@PathVariable Long userId) {
-        List<LearningPlan> learningPlans = learningPlanService.getAllLearningPlansByUserId(userId);
-        return ResponseEntity.ok(learningPlans);
+    @GetMapping
+    public ResponseEntity<List<LearningPlan>> findAll() {
+        List<LearningPlan> plans = learningPlanService.findAll();
+        return ResponseEntity.ok(plans);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<LearningPlan> updateLearningPlan(@PathVariable Long id, @Valid @RequestBody CreateLearningPlanRequestDTO request) {
-        LearningPlan updatedPlan = learningPlanService.updateLearningPlan(id, request);
+    public ResponseEntity<LearningPlan> updatePlan(@PathVariable Long id, @Valid @RequestBody CreateLearningPlanDTO request) {
+        LearningPlan updatedPlan = learningPlanService.updatePlan(id, request);
         return ResponseEntity.ok(updatedPlan);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteLearningPlan(@PathVariable Long id) {
-        learningPlanService.deleteLearningPlan(id);
+    public ResponseEntity<Void> deletePlan(@PathVariable Long id) {
+        learningPlanService.deletePlan(id);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/{id}/progress")
-    public ResponseEntity<ProgressUpdate> addProgressUpdate(@PathVariable Long id,
-                                                            @RequestParam String description,
-                                                            @RequestParam Integer completionPercentage) {
-        ProgressUpdate progressUpdate = learningPlanService.addProgressUpdate(id, description, completionPercentage);
-        return ResponseEntity.ok(progressUpdate);
+    @PatchMapping("/tasks/{taskId}/complete")
+    public ResponseEntity<Task> completeTask(@PathVariable Long taskId) {
+        Task task = learningPlanService.completeTask(taskId);
+        return ResponseEntity.ok(task);
     }
 }
