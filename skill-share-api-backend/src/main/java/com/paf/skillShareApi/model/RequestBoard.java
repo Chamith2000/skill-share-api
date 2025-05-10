@@ -26,6 +26,7 @@ public class RequestBoard {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.EAGER) // Changed to EAGER to ensure user data is loaded
     @JoinColumn(name = "user_id")
@@ -42,5 +43,9 @@ public class RequestBoard {
     // Explicit setter to resolve the compilation error
     public void setIsResolved(boolean isResolved) {
         this.isResolved = isResolved;
+    }
+
+    public boolean getIsResolved() {
+        return false;
     }
 }
