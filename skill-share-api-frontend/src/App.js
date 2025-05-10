@@ -8,6 +8,7 @@ import UserProfilePage from "./pages/UserProfilePage";
 import CreativeBarter from "./pages/CreativeBarter";
 import LearningPlanList from './components/LearningPlanList';
 import CreateLearningPostPage from "./pages/CreateLearningPathPage"
+import OAuthSuccess from "./components/OAuthSuccess";
 
 // Simple auth check
 const PrivateRoute = ({ children }) => {
@@ -28,6 +29,7 @@ function App() {
                 <Route path="/request-board" element={<PrivateRoute><CreativeBarter /></PrivateRoute>} />
                 <Route path="/learning-plans" element={<LearningPlanList />} />
                 <Route path="/create-learn-path" element={<CreateLearningPostPage />} />
+                <Route path="/oauth2/success" element={<OAuthSuccess />} />
                 <Route path="*" element={<Navigate to="/login" />} />
             </Routes>
         </BrowserRouter>

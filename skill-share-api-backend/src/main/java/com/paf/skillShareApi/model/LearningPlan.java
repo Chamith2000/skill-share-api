@@ -1,6 +1,7 @@
 package com.paf.skillShareApi.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,12 @@ public class LearningPlan {
 
     @Column(name = "resources", nullable = false)
     private List<String> resources= new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    @JsonBackReference("user-learning plans")
+    private User user;
+
 
     @OneToMany(mappedBy = "learningPlan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Task> tasks = new ArrayList<>();

@@ -26,7 +26,7 @@ public class Notification {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    @JsonBackReference
+    @JsonBackReference("user-notifications")
     private User user;
 
     @Enumerated(EnumType.STRING)

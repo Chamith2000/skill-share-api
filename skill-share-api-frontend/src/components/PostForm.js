@@ -9,9 +9,12 @@ const PostForm = () => {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
     const [videoError, setVideoError] = useState(null);
-    const [isDragging, setIsDragging] = useState(false); // New state for drag feedback
+    const [isDragging, setIsDragging] = useState(false);
     const videoRef = useRef(null);
-    const fileInputRef = useRef(null); // Ref for file input
+    const fileInputRef = useRef(null);
+
+    // Maximum file size for videos (10MB in bytes)
+    const MAX_VIDEO_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
     // Get logged-in user's ID from localStorage
     const loggedUser = JSON.parse(localStorage.getItem("user"));
@@ -39,9 +42,9 @@ const PostForm = () => {
             setDescription('');
             setFiles([]);
             if (fileInputRef.current) {
-                fileInputRef.current.value = ''; // Reset file input
+                fileInputRef.current.value = '';
             }
-            setTimeout(() => setSuccess(false), 3000); // Clear success message after 3s
+            setTimeout(() => setSuccess(false), 3000);
         } catch (err) {
             setError('Failed to create post. Please try again.');
             console.error('Error creating post:', err);
@@ -52,13 +55,11 @@ const PostForm = () => {
 
     const checkVideoDuration = (file) => {
         return new Promise((resolve, reject) => {
-            // Only check duration for video files
             if (!file.type.startsWith('video/')) {
                 resolve(file);
                 return;
             }
 
-            // Create temporary video element to check duration
             const video = document.createElement('video');
             video.preload = 'metadata';
 
@@ -98,7 +99,7 @@ const PostForm = () => {
         setIsDragging(false);
         const droppedFiles = Array.from(e.dataTransfer.files).filter(
             (file) => file.type.startsWith('image/') || file.type.startsWith('video/')
-        ); // Only accept images and videos
+        );
         handleFiles(droppedFiles);
     };
 
@@ -111,10 +112,15 @@ const PostForm = () => {
         setVideoError(null);
 
         try {
-            // Check all video files for duration limit
+            // Validate all files
             const validatedFiles = await Promise.all(
                 newFiles.map(async (file) => {
                     if (file.type.startsWith('video/')) {
+                        // Check file size
+                        if (file.size > MAX_VIDEO_FILE_SIZE) {
+                            throw new Error(`Video file size exceeds ${MAX_VIDEO_FILE_SIZE / (1024 * 1024)}MB limit (Actual: ${(file.size / (1024 * 1024)).toFixed(2)}MB)`);
+                        }
+                        // Check duration
                         await checkVideoDuration(file);
                     }
                     return file;
@@ -124,7 +130,7 @@ const PostForm = () => {
             setFiles([...files, ...validatedFiles]);
         } catch (err) {
             setVideoError(err.message);
-            console.error('Video validation error:', err);
+            console.error('File validation error:', err);
         }
     };
 
@@ -133,14 +139,14 @@ const PostForm = () => {
         updatedFiles.splice(index, 1);
         setFiles(updatedFiles);
         if (fileInputRef.current) {
-            fileInputRef.current.value = ''; // Reset file input
+            fileInputRef.current.value = '';
         }
     };
 
     const getFileTypeIcon = (file) => {
         if (file.type.startsWith('image/')) return '🖼️';
         if (file.type.startsWith('video/')) return '🎬';
-        return '📎'; // Fallback for other types (though only images/videos are allowed)
+        return '📎';
     };
 
     return (
@@ -199,7 +205,7 @@ const PostForm = () => {
                             <span className="upload-icon">+</span>
                             <span>Click or drag & drop images/videos</span>
                             <small className="upload-help-text">
-                                Supports images and videos (max 30 seconds, 3 files)
+                                Supports images and videos (max 30s, 10MB, 3 files)
                             </small>
                             <input
                                 id="file-upload"
@@ -207,7 +213,7 @@ const PostForm = () => {
                                 multiple
                                 onChange={handleFileChange}
                                 className="file-input"
-                                accept="image/*, video/*"
+                                accept="image/*,video/*"
                                 ref={fileInputRef}
                             />
                         </label>
@@ -222,7 +228,7 @@ const PostForm = () => {
                                         <div className="file-info">
                                             <span className="file-type-icon">{getFileTypeIcon(file)}</span>
                                             <span className="file-name tooltip" title={file.name}>
-                                            {file.name}
+                                                {file.name}
                                             </span>
                                             <span className="file-size">
                                                 {(file.size / 1024).toFixed(2)} KB

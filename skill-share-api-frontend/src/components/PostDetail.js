@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
     getPostById,
@@ -27,8 +27,23 @@ const PostDetail = () => {
     const [editPostText, setEditPostText] = useState('');
     const [likeStatus, setLikeStatus] = useState(false);
     const [likeSubmitting, setLikeSubmitting] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
 
     const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -55,24 +70,40 @@ const PostDetail = () => {
             }
         };
 
-        fetchPost();
-        fetchComments();
-
         const fetchLikeStatus = async () => {
-            if (!user || !user.id || !post) return;
+            // Check localStorage for recent like as a fallback
+            const recentLike = JSON.parse(localStorage.getItem(`like_${postId}`) || 'null');
+            if (recentLike && Date.now() - recentLike.timestamp < 60000) { // Valid for 1 minute
+                setLikeStatus(recentLike.liked);
+            } else {
+                setLikeStatus(false);
+            }
+
+            if (!user || !user.id) {
+                return;
+            }
 
             try {
                 const response = await getLikeStatus(postId, user.id);
+                console.log('Like status received:', response.data);
                 setLikeStatus(response.data.liked);
+                // Update localStorage to reflect backend state
+                localStorage.setItem(`like_${postId}`, JSON.stringify({
+                    liked: response.data.liked,
+                    timestamp: Date.now(),
+                }));
             } catch (err) {
                 console.error('Error fetching like status:', err);
-                setLikeStatus(false);
+                // Fallback to localStorage if API fails
+                if (recentLike && Date.now() - recentLike.timestamp < 60000) {
+                    setLikeStatus(recentLike.liked);
+                }
             }
         };
 
-        if (post && user && user.id) {
-            fetchLikeStatus();
-        }
+        fetchPost();
+        fetchComments();
+        fetchLikeStatus();
     }, [postId]);
 
     const handleLikeToggle = async () => {
@@ -84,20 +115,20 @@ const PostDetail = () => {
         setLikeSubmitting(true);
 
         try {
-            // Call API to toggle like
             const response = await toggleLike(postId, user.id);
             console.log(`Like toggled for post ${postId}:`, response.data);
-
-            // Update like status based on server response
             setLikeStatus(response.data.liked);
-
-            // Update post with new like count
             setPost((prev) => {
                 if (prev) {
                     return { ...prev, likes: response.data.likeCount };
                 }
                 return prev;
             });
+            // Update localStorage
+            localStorage.setItem(`like_${postId}`, JSON.stringify({
+                liked: response.data.liked,
+                timestamp: Date.now(),
+            }));
         } catch (err) {
             console.error('Error toggling like:', err);
             alert('Failed to update like status. Please try again.');
@@ -106,19 +137,11 @@ const PostDetail = () => {
         }
     };
 
-    // Get username from post or user object based on userId
     const getPostUsername = () => {
         if (post) {
-            // First check if post has username directly
             if (post.username) return post.username;
-
-            // Otherwise check if post has user object with username
             if (post.user && post.user.username) return post.user.username;
-
-            // If the post is by the current logged-in user
             if (user && user.id === post.userId && user.username) return user.username;
-
-            // Last resort: show user ID
             return `User #${post.userId}`;
         }
         return 'Unknown User';
@@ -144,7 +167,6 @@ const PostDetail = () => {
             createdAt: new Date().toISOString(),
         };
 
-        // Optimistic update
         setComments((prev) => [...prev, optimisticComment]);
         setNewComment('');
         setCommentSubmitting(true);
@@ -157,22 +179,18 @@ const PostDetail = () => {
             const errorMsg = err.response?.data?.details || err.response?.data?.error || err.message;
             console.error('Comment submission error:', err.response?.data || err);
             alert(`Failed to submit comment: ${errorMsg}`);
-
-            // Rollback optimistic update
             setComments((prev) => prev.filter(c => c.id !== optimisticComment.id));
         } finally {
             setCommentSubmitting(false);
         }
     };
 
-    // Start editing a comment
     const handleEditComment = (comment) => {
         if (!user) {
             alert('Please log in to edit comments.');
             return;
         }
 
-        // Check if the current user is the owner of the comment
         if (user.id !== comment.userId && user.id !== comment.uid) {
             alert('You can only edit your own comments.');
             return;
@@ -182,13 +200,11 @@ const PostDetail = () => {
         setEditCommentText(comment.text);
     };
 
-    // Cancel editing comment
     const handleCancelEdit = () => {
         setEditingComment(null);
         setEditCommentText('');
     };
 
-    // Save edited comment
     const handleSaveEdit = async (commentId) => {
         if (!editCommentText.trim()) {
             alert('Comment cannot be empty.');
@@ -200,7 +216,6 @@ const PostDetail = () => {
                 text: editCommentText
             };
 
-            // Optimistic update
             setComments((prev) => {
                 const updatedComments = prev.map(c =>
                     c.id === commentId ? { ...c, text: editCommentText } : c
@@ -208,73 +223,57 @@ const PostDetail = () => {
                 return updatedComments;
             });
 
-            // Call API to update comment
             await updateComment(postId, commentId, commentData);
             console.log(`Comment ${commentId} updated successfully`);
-
-            // Reset edit state
             setEditingComment(null);
             setEditCommentText('');
         } catch (err) {
             console.error('Error updating comment:', err);
             alert(`Failed to update comment: ${err.message}`);
-
-            // Refresh comments to get the original state
             const commentsResponse = await getCommentsByPostId(postId);
             setComments(commentsResponse.data.comments || []);
         }
     };
 
-    // Delete a comment
     const handleDeleteComment = async (commentId) => {
         if (!user) {
             alert('Please log in to delete comments.');
             return;
         }
 
-        // Find the comment to check ownership
         const commentToDelete = comments.find(c => c.id === commentId);
         if (!commentToDelete) {
             alert('Comment not found.');
             return;
         }
 
-        // Check if the current user is the owner of the comment
         if (user.id !== commentToDelete.userId && user.id !== commentToDelete.uid) {
             alert('You can only delete your own comments.');
             return;
         }
 
-        // Confirm deletion
         if (!window.confirm('Are you sure you want to delete this comment?')) {
             return;
         }
 
         try {
-            // Optimistic update - remove the comment from the UI
             setComments((prev) => prev.filter(c => c.id !== commentId));
-
-            // Call API to delete the comment
             await deleteComment(postId, commentId);
             console.log(`Comment ${commentId} deleted successfully`);
         } catch (err) {
             console.error('Error deleting comment:', err);
             alert(`Failed to delete comment: ${err.message}`);
-
-            // Refresh comments to restore the original state
             const commentsResponse = await getCommentsByPostId(postId);
             setComments(commentsResponse.data.comments || []);
         }
     };
 
-    // Start editing a post
     const handleEditPost = () => {
         if (!user) {
             alert('Please log in to edit posts.');
             return;
         }
 
-        // Check if the current user is the owner of the post
         if (user.id !== post.userId) {
             alert('You can only edit your own posts.');
             return;
@@ -282,15 +281,14 @@ const PostDetail = () => {
 
         setEditingPost(post.id);
         setEditPostText(post.description);
+        setDropdownOpen(false);
     };
 
-    // Cancel editing post
     const handleCancelPostEdit = () => {
         setEditingPost(null);
         setEditPostText(post.description);
     };
 
-    // Save edited post
     const handleSavePostEdit = async () => {
         if (!editPostText.trim()) {
             alert('Post description cannot be empty.');
@@ -302,20 +300,13 @@ const PostDetail = () => {
                 description: editPostText
             };
 
-            // Optimistic update
             setPost((prev) => ({ ...prev, description: editPostText }));
-
-            // Call API to update post
             await updatePost(postId, postData);
             console.log(`Post ${postId} updated successfully`);
-
-            // Reset edit state
             setEditingPost(null);
         } catch (err) {
             console.error('Error updating post:', err);
             alert(`Failed to update post: ${err.message}`);
-
-            // Refresh post to get the original state
             try {
                 const postResponse = await getPostById(postId);
                 setPost(postResponse.data);
@@ -326,29 +317,24 @@ const PostDetail = () => {
         }
     };
 
-    // Delete a post
     const handleDeletePost = async () => {
         if (!user) {
             alert('Please log in to delete posts.');
             return;
         }
 
-        // Check if the current user is the owner of the post
         if (user.id !== post.userId) {
             alert('You can only delete your own posts.');
             return;
         }
 
-        // Confirm deletion
         if (!window.confirm('Are you sure you want to delete this post?')) {
             return;
         }
 
         try {
-            // Call API to delete the post
             await deletePost(postId);
             console.log(`Post ${postId} deleted successfully`);
-            // Redirect to home page after deletion
             window.location.href = '/home-page';
         } catch (err) {
             console.error('Error deleting post:', err);
@@ -356,12 +342,14 @@ const PostDetail = () => {
         }
     };
 
-    // Check if user can edit/delete a post
+    const handleToggleDropdown = () => {
+        setDropdownOpen((prev) => !prev);
+    };
+
     const canEditPost = () => {
         return user && post && user.id === post.userId;
     };
 
-    // Check if user can edit/delete a comment
     const canEditComment = (comment) => {
         return user && (user.id === comment.userId || user.id === comment.uid);
     };
@@ -404,8 +392,16 @@ const PostDetail = () => {
                         </div>
                         {canEditPost() && (
                             <div className="post-options">
-                                <div className="dropdown">
-                                    <span className="options-icon">⋮</span>
+                                <div
+                                    className={`dropdown ${dropdownOpen ? 'show-dropdown' : ''}`}
+                                    ref={dropdownRef}
+                                >
+                                    <span
+                                        className="options-icon"
+                                        onClick={handleToggleDropdown}
+                                    >
+                                        ⋮
+                                    </span>
                                     <div className="dropdown-content">
                                         <button onClick={handleEditPost} className="edit-button">Edit Post</button>
                                         <button onClick={handleDeletePost} className="delete-button">Delete Post</button>
@@ -452,15 +448,30 @@ const PostDetail = () => {
                     <div className={`media-gallery media-count-${post.media.length}`}>
                         {post.media.map((mediaItem, idx) => (
                             <div key={idx} className="media-item">
-                                <img
-                                    src={mediaItem.url}
-                                    alt={`Post media ${idx + 1}`}
-                                    className="media-image"
-                                    onError={(e) => {
-                                        e.target.src = 'https://via.placeholder.com/300?text=Image+Not+Found';
-                                        console.error(`Failed to load image for post ${post.id}: ${mediaItem.url}`);
-                                    }}
-                                />
+                                {mediaItem.mediaType === 'video' ? (
+                                    <video
+                                        src={mediaItem.url}
+                                        className="media-video"
+                                        controls
+                                        muted={false}
+                                        playsInline
+                                        preload="metadata"
+                                        onError={(e) => {
+                                            e.target.poster = 'https://placehold.co/300x300?text=Video+Not+Found';
+                                            console.error(`Failed to load video for post ${post.id}: ${mediaItem.url}`);
+                                        }}
+                                    />
+                                ) : (
+                                    <img
+                                        src={mediaItem.url}
+                                        alt={`Post media ${idx + 1}`}
+                                        className="media-image"
+                                        onError={(e) => {
+                                            e.target.src = 'https://placehold.co/300x300?text=Image+Not+Found';
+                                            console.error(`Failed to load image for post ${post.id}: ${mediaItem.url}`);
+                                        }}
+                                    />
+                                )}
                             </div>
                         ))}
                     </div>
@@ -484,9 +495,6 @@ const PostDetail = () => {
                     <button className="action-button">
                         <span className="comment-icon">💬</span>
                         <span>{comments.length}</span>
-                    </button>
-                    <button className="action-button">
-                        <span className="share-icon">↗️</span>
                     </button>
                 </div>
 

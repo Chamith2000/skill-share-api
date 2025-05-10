@@ -1,21 +1,21 @@
 .post-form-container {
-    max-width: 900px; /* Increased from 600px to match PostList.css */
+    max-width: 900px;
     margin: 5rem auto;
-    padding: 2.5rem; /* Slightly increased padding for spacious feel */
+    padding: 2.5rem;
     background: #fff;
-    border-radius: 12px; /* Matches PostList.css */
-    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.12); /* Matches PostList.css */
+    border-radius: 12px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.12);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .post-form-container:hover {
-    transform: translateY(-3px); /* Matches PostList.css hover effect */
+    transform: translateY(-3px);
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
 }
 
 .form-title {
-    font-size: 2rem; /* Slightly larger for prominence */
-    color: #333; /* Matches PostList.css */
+    font-size: 2rem;
+    color: #333;
     margin-bottom: 2rem;
     text-align: center;
     font-weight: 600;
@@ -26,9 +26,9 @@
 
 .form-title::after {
     content: '';
-    width: 80px; /* Slightly wider for balance */
+    width: 80px;
     height: 4px;
-    background: linear-gradient(to right, #3897f0, #e53935); /* Matches PostList.css colors */
+    background: linear-gradient(to right, #3897f0, #e53935);
     margin: 12px auto 0;
     border-radius: 4px;
     display: block;
@@ -37,7 +37,7 @@
 .post-form {
     display: flex;
     flex-direction: column;
-    gap: 2rem; /* Increased for better spacing */
+    gap: 2rem;
 }
 
 .form-group {
@@ -58,8 +58,8 @@
 }
 
 .form-label:hover {
-    color: #3897f0; /* Matches PostList.css comment button color */
-    transform: translateX(3px); /* Subtle interactivity */
+    color: #3897f0;
+    transform: translateX(3px);
 }
 
 .form-label:before {
@@ -67,20 +67,20 @@
     font-size: 1rem;
 }
 
-.form-label[for="files"]:before {
+.form-label[for="file-upload"]:before {
     content: '📎';
 }
 
 .form-textarea {
     width: 100%;
     padding: 15px;
-    border: 1px solid #dbdbdb; /* Matches PostList.css */
-    border-radius: 8px; /* Softer corners */
+    border: 1px solid #dbdbdb;
+    border-radius: 8px;
     font-size: 1rem;
     resize: vertical;
-    min-height: 140px; /* Slightly taller for better UX */
+    min-height: 140px;
     transition: all 0.3s ease;
-    background-color: #fafafa; /* Matches PostList.css comments section */
+    background-color: #fafafa;
 }
 
 .form-textarea:focus {
@@ -91,7 +91,7 @@
 }
 
 .form-textarea::placeholder {
-    color: #8e8e8e; /* Matches PostList.css */
+    color: #8e8e8e;
     font-style: italic;
 }
 
@@ -108,7 +108,7 @@
 }
 
 .character-count.danger {
-    color: #e53935; /* Matches PostList.css like button */
+    color: #e53935;
 }
 
 .file-upload-container {
@@ -121,7 +121,7 @@
     align-items: center;
     justify-content: center;
     padding: 2.5rem;
-    border: 2px dashed #dbdbdb; /* Matches PostList.css borders */
+    border: 2px dashed #dbdbdb;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -131,14 +131,15 @@
 
 .file-upload-label:hover {
     border-color: #3897f0;
-    background-color: #f0f7fb; /* Matches PostList.css hover */
-    transform: scale(1.01); /* Subtle zoom for interactivity */
+    background-color: #f0f7fb;
+    transform: scale(1.01);
 }
 
 .file-upload-label.dragging {
     background-color: #e3f2fd;
     border-color: #2196f3;
     transform: scale(1.02);
+    box-shadow: 0 0 10px rgba(33, 150, 243, 0.3);
 }
 
 .upload-icon {
@@ -148,8 +149,8 @@
     transition: transform 0.3s ease;
 }
 
-.file-upload-label:hover .upload-icon {
-    transform: scale(1.3) rotate(10deg); /* Playful animation */
+.file-upload-label.dragging .upload-icon {
+    transform: scale(1.4) rotate(20deg);
 }
 
 .upload-help-text {
@@ -168,7 +169,7 @@
     border-radius: 8px;
     padding: 1.5rem;
     background-color: #fafafa;
-    animation: slideIn 0.3s ease; /* Smooth appearance */
+    animation: slideIn 0.3s ease;
 }
 
 @keyframes slideIn {
@@ -241,10 +242,10 @@
 
 .file-info {
     display: flex;
-    align-items: center; /* Changed to align items horizontally */
+    align-items: center;
     overflow: hidden;
     flex: 1;
-    gap: 10px; /* Space between icon, name, and size */
+    gap: 10px;
 }
 
 .file-type-icon {
@@ -259,13 +260,13 @@
     overflow: hidden;
     text-overflow: ellipsis;
     font-weight: 500;
-    flex: 1; /* Takes available space */
+    flex: 1;
 }
 
 .file-size {
     font-size: 0.85rem;
     color: #8e8e8e;
-    margin-left: 10px; /* Space between name and size */
+    margin-left: 10px;
 }
 
 .file-tag {
@@ -280,7 +281,7 @@
 .remove-file-btn {
     background: none;
     border: none;
-    color: #e53935; /* Matches PostList.css like button */
+    color: #e53935;
     font-size: 1.4rem;
     cursor: pointer;
     padding: 0.5rem;
@@ -294,13 +295,13 @@
 }
 
 .remove-file-btn:hover {
-    background-color: #ffebee; /* Matches PostList.css like button hover */
-    transform: scale(1.2) rotate(90deg); /* Playful animation */
+    background-color: #ffebee;
+    transform: scale(1.2) rotate(90deg);
 }
 
 .submit-btn {
     padding: 14px 30px;
-    background: linear-gradient(to right, #3897f0, #1877f2); /* Matches PostList.css comment button */
+    background: linear-gradient(to right, #3897f0, #1877f2);
     color: white;
     border: none;
     border-radius: 8px;
@@ -373,7 +374,7 @@
 }
 
 .alert-success {
-    background: #d4edda; /* Matches PostList.css green tones */
+    background: #d4edda;
     color: #155724;
     border: 1px solid #c3e6cb;
 }
@@ -383,7 +384,7 @@
 }
 
 .alert-error {
-    background: #f8d7da; /* Matches PostList.css red tones */
+    background: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
 }
@@ -392,7 +393,6 @@
     content: '❌';
 }
 
-/* Animations */
 @keyframes pulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.06); }
@@ -403,7 +403,6 @@
     animation: pulse 0.6s ease;
 }
 
-/* Responsive design */
 @media (max-width: 768px) {
     .post-form-container {
         max-width: 100%;
@@ -456,10 +455,9 @@
     }
 }
 
-/* Dark mode support */
 @media (prefers-color-scheme: dark) {
     .post-form-container {
-        background: #1e1e1e; /* Darker background */
+        background: #1e1e1e;
         box-shadow: 0 3px 15px rgba(0, 0, 0, 0.3);
     }
 
@@ -516,10 +514,9 @@
     }
 }
 
-/* Interactive enhancements */
 .form-group:focus-within .form-label {
     color: #3897f0;
-    transform: scale(1.05); /* Subtle zoom on focus */
+    transform: scale(1.05);
 }
 
 .loading-spinner {
@@ -544,7 +541,6 @@
     pointer-events: none;
 }
 
-/* File preview images */
 .image-preview {
     max-width: 80px;
     height: 60px;
@@ -558,13 +554,11 @@
     transform: scale(1.1);
 }
 
-/* File type indicators */
 .file-type-icon {
     margin-right: 10px;
     font-size: 1.5rem;
 }
 
-/* Tooltip for file names */
 .file-name.tooltip {
     position: relative;
 }
@@ -585,52 +579,4 @@
     opacity: 0;
     transition: opacity 0.3s ease;
     opacity: 1;
-}
-
-.file-upload-container {
-    margin-top: 0.75rem;
-}
-
-.file-upload-label {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2.5rem;
-    border: 2px dashed #dbdbdb;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: center;
-    background-color: #fafafa;
-}
-
-.file-upload-label:hover {
-    border-color: #3897f0;
-    background-color: #f0f7fb;
-    transform: scale(1.01);
-}
-
-.file-upload-label.dragging {
-    background-color: #e3f2fd;
-    border-color: #2196f3;
-    transform: scale(1.02);
-    box-shadow: 0 0 10px rgba(33, 150, 243, 0.3); /* Glow effect during drag */
-}
-
-.upload-icon {
-    font-size: 2.5rem;
-    color: #3897f0;
-    margin-bottom: 0.75rem;
-    transition: transform 0.3s ease;
-}
-
-.file-upload-label.dragging .upload-icon {
-    transform: scale(1.4) rotate(20deg); /* More pronounced animation during drag */
-}
-
-.upload-help-text {
-    font-size: 0.85rem;
-    color: #8e8e8e;
-    margin-top: 0.5rem;
 }

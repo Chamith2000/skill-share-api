@@ -383,3 +383,4 @@ export const createLearningPlansBatch = async (data) => {
 };
 
 export default api;
+
